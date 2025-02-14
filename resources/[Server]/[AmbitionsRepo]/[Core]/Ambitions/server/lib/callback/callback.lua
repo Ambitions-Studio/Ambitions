@@ -1,4 +1,4 @@
--- Credits: https://github.com/overextended/ox_lib
+-- Credits: https://github.com/overextended/ox_lib/
 
 local pendingCallbacks = {}
 local cbEvent = '__ambitions_callback_%s'
