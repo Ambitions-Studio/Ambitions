@@ -10,3 +10,4 @@ server.cfg
 .idea/
 .vscode/
 txData/
+debug.log

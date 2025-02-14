@@ -1,3 +1,4 @@
+-- Credits: https://github.com/overextended/ox_lib/
 ---Yields the current thread until a non-nil value is returned by the function.
 ---@generic T
 ---@param cb fun(): T?
