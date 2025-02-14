@@ -1,3 +1,5 @@
+-- Credits: https://github.com/overextended/ox_lib
+
 local pendingCallbacks = {}
 local cbEvent = '__ambitions_callback_%s'
 local callbackTimeout = GetConvarInt('ambitions:callbackTimeout', 300000)
