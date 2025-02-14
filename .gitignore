@@ -1,0 +1,12 @@
+Artefact/
+cache/
+resources/\[Default\]/
+resources/\[Server\]/ox_lib/
+resources/\[Server\]/ox_target/
+resources/\[Server\]/oxmysql/
+server.cfg
+.replxx_history
+*.bat
+.idea/
+.vscode/
+txData/
