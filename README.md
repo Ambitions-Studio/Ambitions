@@ -1,11 +1,12 @@
 # 🚀 Ambitions - A Modern and Optimized FiveM Framework
 
-### DOCUMENTATION : **SOON**
-
 ![GitHub License](https://img.shields.io/badge/license-Apache%202.0-red.svg)
 ![FiveM](https://img.shields.io/badge/FiveM-Framework-blue)
 ![MariaDB](https://img.shields.io/badge/Database-MariaDB-important)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+
+### DOCUMENTATION : 
+**SOON**
 
 ## 📌 About Ambitions
 **Ambitions** is a fully custom FiveM framework designed for **performance, scalability, and security**. It is built to handle **high concurrency** efficiently, making it suitable for **both small and large servers**. 
