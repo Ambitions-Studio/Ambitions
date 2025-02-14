@@ -6,7 +6,7 @@
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
 
 ### DOCUMENTATION : 
-**SOON**
+*SOON*
 
 ## 📌 About Ambitions
 **Ambitions** is a fully custom FiveM framework designed for **performance, scalability, and security**. It is built to handle **high concurrency** efficiently, making it suitable for **both small and large servers**. 
