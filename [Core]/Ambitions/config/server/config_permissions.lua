@@ -28,7 +28,6 @@ return {
             Command = {
                 Info = true,
                 Data = true,
-                setGroup = true,
             }
         }
     },
