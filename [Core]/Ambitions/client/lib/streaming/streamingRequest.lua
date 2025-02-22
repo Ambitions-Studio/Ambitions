@@ -1,4 +1,4 @@
---- Credits: https://github.com/overextended/ox_lib/
+--- Credits: https://github.com/overextended/ox_lib
 --- Used internally, this function is used to request streaming assets.
 ---@async
 ---@generic T : string | number
