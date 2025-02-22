@@ -9,6 +9,7 @@ RegisterNetEvent(cbEvent:format(GetCurrentResourceName()), function(key, ...)
     local cb = pendingCallbacks[key]
     pendingCallbacks[key] = nil
 
+---@diagnostic disable-next-line: redundant-return-value
     return cb and cb(...)
 end)
 

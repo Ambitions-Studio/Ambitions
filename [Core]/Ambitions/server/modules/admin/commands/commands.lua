@@ -255,7 +255,7 @@ end, true, {
 })
 
 ABT.RegisterCommand('info', 'Info', function(amberPlayer)
-    ABT.Print.Log(1, 'ID :', amberPlayer.source, '| Name : ', ABT.Player.GetPlayerIdentifier(amberPlayer.source).name, '| Group :', amberPlayer.getCurrentCharacter().getGroup(), '| Job :', amberPlayer.getCurrentCharacter().getJob().label, '| Job Grade :', amberPlayer.getCurrentCharacter().getJobGrade(), '| Crew :', amberPlayer.getCurrentCharacter().getCrew().label, '| Crew Grade :', amberPlayer.getCurrentCharacter().getCrewGrade())
+    ABT.Print.Log(1, 'ID :', amberPlayer.source, '| Name : ', ABT.Player.GetPlayerIdentifier(amberPlayer.source)['name'], '| Group :', amberPlayer.getCurrentCharacter().getGroup(), '| Job :', amberPlayer.getCurrentCharacter().getJob().label, '| Job Grade :', amberPlayer.getCurrentCharacter().getJobGrade(), '| Crew :', amberPlayer.getCurrentCharacter().getCrew().label, '| Crew Grade :', amberPlayer.getCurrentCharacter().getCrewGrade())
 end, false, {
     help = "Get your information"
 })

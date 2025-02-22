@@ -259,7 +259,7 @@ end
 RegisterServerEvent('ambitions:server:spawnedPlayer', function()
     local source = source
     local PLAYER_IDENTIFIERS <const> = ABT.Player.GetPlayerIdentifier(source)
-    local playerLicense = PLAYER_IDENTIFIERS.license
+    local playerLicense = PLAYER_IDENTIFIERS['license']
 
     if not playerLicense then
         ABT.Print.Log(3, 'Failed to retrieve license for source:', source)
