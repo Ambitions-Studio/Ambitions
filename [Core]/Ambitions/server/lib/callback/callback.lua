@@ -1,4 +1,4 @@
---- Credits: https://github.com/overextended/ox_lib/
+--- Credits: https://github.com/overextended/ox_lib
 
 local pendingCallbacks = {}
 local cbEvent = '__ambitions_callback_%s'
@@ -8,7 +8,6 @@ RegisterNetEvent(cbEvent:format(GetCurrentResourceName()), function(key, ...)
     local cb = pendingCallbacks[key]
     pendingCallbacks[key] = nil
 
----@diagnostic disable-next-line: redundant-return-value
     return cb and cb(...)
 end)
 
