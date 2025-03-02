@@ -3,21 +3,26 @@
 ---@return void
 AddEventHandler('playerDropped', function(reason)
     local SOURCE <const> = source
+    local PLAYER = ABT.GetPlayerFromId(SOURCE)
 
-    ABT.Player.SavePlayer(SOURCE, function(success)
-        if not success then
-            ABT.Print.Log(3, 'Failed to save player data for source :', SOURCE)
-        end
-        if not ABT.Players[SOURCE] then
-            ABT.Print.Log(3, 'Attempted to remove a non-existent player from the general players list, player source : ', SOURCE)
+    if PLAYER then
+        TriggerEvent('ambitions:playerDropped', SOURCE, reason)
 
-            return
-        end
+        ABT.Player.SavePlayer(SOURCE, function(success)
+            if not success then
+                ABT.Print.Log(3, 'Failed to save player data for source :', SOURCE)
+            end
+            if not ABT.Players[SOURCE] then
+                ABT.Print.Log(3, 'Attempted to remove a non-existent player from the general players list, player source : ', SOURCE)
 
-        ABT.Players[SOURCE] = nil
-    end)
+                return
+            end
 
-    TriggerClientEvent('ambitions:playerUnloaded', SOURCE)
+            ABT.Players[SOURCE] = nil
+        end)
+
+        TriggerClientEvent('ambitions:playerUnloaded', SOURCE)
+    end
 end)
 
 function ABT.GetPlayerFromId(source)
