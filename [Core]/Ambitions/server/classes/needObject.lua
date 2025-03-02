@@ -83,6 +83,37 @@ end
         end
     end
 
+    ---@param need string The need to add.
+    ---@param amount number The amount to add to the need.
+    ---@return void
+    function self.addNeed(need, amount)
+        if self.needs[need] ~= nil then
+            self.needs[need] = math.max(0, math.min(100, self.needs[need] + amount))
+        elseif self.needs.addictionTypes[need] ~= nil then
+            local newValue = math.max(0, math.min(100, self.needs.addictionTypes[need] + amount))
+            self.needs.addictionTypes[need] = newValue
+            manageLifetimeAddictions(need)
+        else
+            ABT.Print.Log(3, ('Unable to add need %s. It does not exist.'):format(need))
+        end
+    end
+
+    ---@param need string The need to remove.
+    ---@param amount number The amount to remove from the need.
+    ---@return void
+    function self.removeNeed(need, amount)
+        if self.needs[need] ~= nil then
+            self.needs[need] = math.max(0, math.min(100, self.needs[need] - amount))
+        elseif self.needs.addictionTypes[need] ~= nil then
+            local newValue = math.max(0, math.min(100, self.needs.addictionTypes[need] - amount))
+            self.needs.addictionTypes[need] = newValue
+            manageLifetimeAddictions(need)
+        else
+            ABT.Print.Log(3, ('Unable to remove need %s. It does not exist.'):format(need))
+        end
+    end
+
+
     ---@param need string The need to modify.
     ---@param amount number The amount to modify the need by.
     ---@return void

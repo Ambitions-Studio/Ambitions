@@ -5,7 +5,6 @@ return {
 
     STARTING_ACCOUNT_MONEY = {
         cash = 1000.00,
-        bank = 1000.00,
         dirty = 0.00
     }
 }

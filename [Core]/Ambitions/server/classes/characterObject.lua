@@ -56,12 +56,6 @@ function CreateAmberCharacter(source, uniqueID, group, job, crew, accounts, lice
         return self.source
     end
 
-    ---@param uniqueID string The unique ID of the character.
-    ---@return void
-    function self.setUniqueID(uniqueID)
-        self.uniqueID = uniqueID
-    end
-
     ---@return string uniqueID The unique ID of the character.
     function self.getUniqueID()
         return self.uniqueID

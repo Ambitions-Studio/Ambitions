@@ -218,9 +218,9 @@ end
 ---@param identifiers table The player's identifiers.
 ---@param amberPlayer table The player's Amber object.
 local function InsertUser(source, identifiers, amberPlayer)
-    local LICENSE <const> = identifiers.license
-    local DISCORD_ID <const> = identifiers.discord
-    local IP <const> = identifiers.ip
+    local LICENSE <const> = identifiers['license']
+    local DISCORD_ID <const> = identifiers['discord']
+    local IP <const> = identifiers['ip']
 
     if not LICENSE or not DISCORD_ID or not IP then
         ABT.Print.Log(3, 'Invalid player identifiers for player with source ID:', source)

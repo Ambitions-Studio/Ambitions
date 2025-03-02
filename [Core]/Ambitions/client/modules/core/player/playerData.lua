@@ -1,7 +1,13 @@
+--- Get PlayerData from the server
+---@return table PlayerData
 function ABT.GetPlayerData()
     return ABT.PlayerData
 end
 
+--- Set Player Data from the server
+--- @param key string The key of the data
+--- @param value any The value of the data
+--- @return void
 function ABT.SetPlayerData(key, value)
     local currentData = ABT.PlayerData[key]
     ABT.PlayerData[key] = value

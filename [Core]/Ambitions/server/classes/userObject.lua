@@ -13,12 +13,6 @@ function CreateAmberUser(source, license)
     self.characters = {}
     self.currentCharacter = nil -- Reference to the active character.
 
-    ---@param license string The player's license.
-    ---@return void
-    function self.setLicense(license)
-        self.license = 'license:' .. license
-    end
-
     ---@return string license The player's license.
     function self.getLicense()
         return self.license
