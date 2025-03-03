@@ -104,15 +104,6 @@ function ABT.RegisterCommand(commandName, requiredPermission, callback, isAllowC
                         return
                     end
                     parsedArgs[argConfig.name] = arg
-
-                -- Command for item
-                elseif argConfig.type == 'item' then
-                    local item = ABT.Items[arg]
-                    if not item then
-                        HandleCommandErrors(("Argument #%d must be a valid item name."):format(i))
-                        return
-                    end
-                    parsedArgs[argConfig.name] = item
                 elseif argConfig.type == "player" or argConfig.type == "playerId" then
                     local target = tonumber(arg) or (arg == "me" and source)
                     if not target or not ABT.GetPlayerFromId(target) then
