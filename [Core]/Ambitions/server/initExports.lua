@@ -3,3 +3,7 @@ ABT.Societies = {}
 ABT.Crews = {}
 ABT.Player = {}
 ABT.Utils = {}
+ABT.Items = {}
+ABT.Item = {}
+ABT.Overrides = {}
+ABT.PlayerFunctionOverrides = {}

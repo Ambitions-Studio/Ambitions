@@ -381,5 +381,15 @@ function CreateAmberCharacter(source, uniqueID, group, job, crew, accounts, lice
         }
     end
 
+
+
+
+
+    for _, funcs in pairs(ABT.PlayerFunctionOverrides) do
+        for fnName, fn in pairs(funcs) do
+            self[fnName] = fn(self)
+        end
+    end
+
     return self
 end
