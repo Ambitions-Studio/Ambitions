@@ -6,7 +6,7 @@ author 'Primordial Studio'
 
 description 'Ambitions Framework Handmade'
 
-version '0.1.3'
+version '0.5.1'
 
 name 'Ambitions'
 

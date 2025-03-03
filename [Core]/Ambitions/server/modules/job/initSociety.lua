@@ -117,3 +117,8 @@ AddEventHandler('onResourceStart', function(resourceName)
     DefaultSociety()
     FetchSociety()
 end)
+
+RegisterNetEvent("ambitions:setJob")
+AddEventHandler("ambitions:setJob", function(Job)
+    ABT.SetPlayerData("job", Job)
+end)

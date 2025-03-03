@@ -15,6 +15,20 @@ RegisterNetEvent('ambitions:character:updateHealth', function(health)
     SetEntityHealth(player, health)
 end)
 
+RegisterNetEvent('ambitions:needs:add', function(name, value)
+    local player = ABT.GetPlayerData(PlayerPedId())
+    local character = player.getCurrentCharacter()
+
+    character.needs.addNeed(name, value)
+end)
+
+RegisterNetEvent('ambitions:needs:remove', function(name, value)
+    local player = ABT.GetPlayerData(PlayerPedId())
+    local character = player.getCurrentCharacter()
+
+    character.needs.removeNeed(name, value)
+end)
+
 RegisterNetEvent('ambitions:command:revivePlayer', function()
     local player = PlayerPedId()
     local playerCoords = GetEntityCoords(player)

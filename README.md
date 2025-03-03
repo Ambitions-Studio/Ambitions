@@ -5,7 +5,7 @@
 ![MariaDB](https://img.shields.io/badge/Database-MariaDB-important)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
 
-### DOCUMENTATION : 
+### DOCUMENTATION (NOT FINISH YET) : 
 [*Ambitions Documentation*](https://ambitions.gitbook.io/ambitions-documentation/)
 
 ## 📌 About Ambitions
