@@ -27,8 +27,11 @@ client_scripts {
     'client/*.lua',
 }
 
-ui_page ''
+ui_page 'web/dist/index.html'
 files {
+    'web/dist/index.html',
+    'web/dist/assets/*.js',
+    'web/dist/assets/*.css',
 }
 
 dependencies {

@@ -101,7 +101,7 @@ RegisterNetEvent('ambitions:playerLoaded', function(characterData, amberPlayer)
             ABT.Print.Log(1, 'Loading character data ...', characterData)
         end
     end
-    
+
     CreateAmbitionsPlayer(characterData)
     ABT.SetPlayerData('ped', PlayerPedId())
     ABT.SetPlayerData('dead', characterData.isDead)
