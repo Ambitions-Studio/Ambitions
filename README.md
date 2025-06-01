@@ -39,7 +39,7 @@ Built from scratch with Lua 5.4 standards and a forward-thinking design, it’s 
 
 ## ⚙️ Requirements
 
-To run Ambitions Core, you’ll need:
+To run Ambitions, you’ll need:
 
 | Requirement             | Version / Note                   |
 |-------------------------|----------------------------------|
