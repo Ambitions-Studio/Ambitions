@@ -7,6 +7,13 @@
 
 ---
 
+## 👥 Join the Community
+
+Need live chat, quick help, or want to follow development more closely?  
+👉 **[Join our Discord](https://discord.gg/9T59R7xXwk)** — everyone’s welcome!
+
+---
+
 ## 📚 Documentation
 
 You’ll find full documentation, usage guides, and contribution rules on our official GitBook:
