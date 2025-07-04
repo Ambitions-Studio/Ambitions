@@ -36,40 +36,47 @@ local function importViaIndex(resource, functionNames, targetResource)
 
     local results = {}
     for i, funcName in ipairs(functionNames) do
-        local modulePath = indices[funcName]
-        if not modulePath then
-            error(("Function '%s' not found in %s registry"):format(funcName, targetResource), 2)
-        end
+        -- Check for new colon syntax: ModuleName:key
+        local moduleName, keyName = funcName:match("^([^:]+):(.+)$")
+        
+        if moduleName and keyName then
+            -- New syntax: ModuleName:key
+            local modulePath = indices[moduleName]
+            if not modulePath then
+                error(("Module '%s' not found in %s registry"):format(moduleName, targetResource), 2)
+            end
 
-        local moduleResult = importWithResource(targetResource, modulePath)
-
-        if type(moduleResult) == "table" and moduleResult[funcName] then
-            results[i] = moduleResult[funcName]
-        elseif type(moduleResult) == "function" then
-            results[i] = moduleResult
+            local moduleResult = importWithResource(targetResource, modulePath)
+            
+            if type(moduleResult) ~= "table" then
+                error(("Module '%s' did not return a table, cannot extract key '%s'"):format(moduleName, keyName), 2)
+            end
+            
+            if moduleResult[keyName] == nil then
+                error(("Key '%s' not found in module '%s'"):format(keyName, moduleName), 2)
+            end
+            
+            results[i] = moduleResult[keyName]
         else
-            error(("Function '%s' not found in module '%s'"):format(funcName, modulePath), 2)
+            -- Original syntax: direct function/module name
+            local modulePath = indices[funcName]
+            if not modulePath then
+                error(("Function '%s' not found in %s registry"):format(funcName, targetResource), 2)
+            end
+
+            local moduleResult = importWithResource(targetResource, modulePath)
+
+            if type(moduleResult) == "table" and moduleResult[funcName] then
+                results[i] = moduleResult[funcName]
+            elseif type(moduleResult) == "function" then
+                results[i] = moduleResult
+            else
+                error(("Function '%s' not found in module '%s'"):format(funcName, modulePath), 2)
+            end
         end
     end
 
     return #results == 1 and results[1] or table.unpack(results)
-end
-
---- Extract a specific key from a module
---- @param resource string The resource name
---- @param moduleName string The module path
---- @param keyName string The key to extract
---- @return any The extracted value
-local function importWithKey(resource, moduleName, keyName)
-    local mod = importWithResource(resource, moduleName)
-    assert(type(mod) == "table", ("Module '%s' did not return a table"):format(moduleName))
-
-    local part = mod[keyName]
-    if part == nil then
-        error(("Key '%s' not found in module '%s'"):format(keyName, moduleName), 2)
-    end
-    
-    return part
 end
 
 --- Standard module import with caching
@@ -108,7 +115,7 @@ local function importModule(resource, moduleName)
             code = file
             break
         else
-            errors[#errors+1] = ("no file '@%s/%s'"):format(targetRes, filePath)
+            errors[#errors + 1] = ("no file '@%s/%s'"):format(targetRes, filePath)
         end
     end
 
@@ -149,25 +156,20 @@ end
 --- Supports multiple syntaxes for maximum flexibility:
 --- 1. Import('module.path') - Import entire module from current resource
 --- 2. Import('@Resource.module.path') - Import entire module from external resource
---- 3. Import('FunctionName', '@Resource') - Import function via index
---- 4. Import({'Func1', 'Func2'}, '@Resource') - Import multiple functions via index
---- 5. Import('module.path', 'keyName') - Extract specific key from module
---- @param moduleNameOrKeys string|table Module path, function name(s), or key to extract
---- @param keyOrResource string|nil Key to extract from module OR resource name for index lookup
+--- 3. Import('ModuleName', '@Resource') - Import module via index
+--- 4. Import('ModuleName:key', '@Resource') - Import specific key from module via index
+--- 5. Import({'ModuleName1', 'ModuleName2:key'}, '@Resource') - Import multiple modules/keys via index
+--- @param moduleNameOrKeys string|table Module path or function/module names
+--- @param keyOrResource string|nil Resource name for index lookup
 --- @return any importedModule The imported module, function(s), or extracted value
 local function importWithResource(resource, moduleNameOrKeys, keyOrResource)
-    -- Case 1: Index-based import (ImportPart style)
+    -- Case 1: Index-based import
     if type(keyOrResource) == "string" and keyOrResource:match("^@") then
         local targetResource = keyOrResource:sub(2)
         return importViaIndex(resource, moduleNameOrKeys, targetResource)
     end
 
-    -- Case 2: Extract key from module (old syntax)
-    if type(keyOrResource) == "string" and not keyOrResource:match("^@") then
-        return importWithKey(resource, moduleNameOrKeys, keyOrResource)
-    end
-
-    -- Case 3: Standard module import
+    -- Case 2: Direct module import (internal/external)
     return importModule(resource, moduleNameOrKeys)
 end
 
@@ -283,11 +285,11 @@ end
 --- Supports multiple syntaxes:
 --- 1. Import('module.path') - Import entire module
 --- 2. Import('@Resource.module.path') - Import from external resource
---- 3. Import('FunctionName', '@Resource') - Import via index
---- 4. Import({'Func1', 'Func2'}, '@Resource') - Import multiple via index
---- 5. Import('module.path', 'keyName') - Extract key from module
+--- 3. Import('ModuleName', '@Resource') - Import module via index
+--- 4. Import('ModuleName:key', '@Resource') - Import specific key from module via index
+--- 5. Import({'ModuleName1', 'ModuleName2:key'}, '@Resource') - Import multiple modules/keys via index
 --- @param moduleNameOrKeys string|table Module path or function names
---- @param keyOrResource string|nil Key to extract or resource name
+--- @param keyOrResource string|nil Resource name for index-based imports
 --- @return any The imported module, function(s), or value
 function Import(moduleNameOrKeys, keyOrResource)
     return importWithResource(CURRENT_RESOURCE, moduleNameOrKeys, keyOrResource)
