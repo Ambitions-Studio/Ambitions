@@ -56,9 +56,9 @@ local function ambitionsRequire(module)
         module, table.concat(tried, "\n")), 2)
 end
 
-AddEventHandler('onResourceStop', function(res)
+AddEventHandler('onResourceStop', function(resource)
     for k in pairs(LOADED_CACHE) do
-        if k:sub(1, #res + 1) == res .. ":" then
+        if k:sub(1, #resource + 1) == resource .. ":" then
             LOADED_CACHE[k] = nil
         end
     end

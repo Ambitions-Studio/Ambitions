@@ -19,8 +19,6 @@ shared_script 'importation.lua'
 shared_scripts {
     'shared/initExports.lua',
 
-    'shared/lib/print/log.lua',
-
     'translations/*.lua',
 
     'config/shared/*.lua',
