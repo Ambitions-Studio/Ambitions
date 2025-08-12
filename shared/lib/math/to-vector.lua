@@ -58,7 +58,7 @@ local function createVector(components)
   end
 end
 
-local toScalars = require('to-scalars')
+local toScalars = require('lib.math.to-scalars')
 
 local ambitionsToVector = {}
 
