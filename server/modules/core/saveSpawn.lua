@@ -3,7 +3,21 @@ local identifiers = require('server.lib.player.identifiers')
 local random = require('shared.lib.math.random')
 local spawnConfig = require('config.spawn')
 
-local function GenerateUniqueId()
+--- Check if the unique id is already in use by a character
+---@param uniqueId string The unique id to check
+---@return boolean isInUse True if the unique id is in use, false otherwise
+local function isUniqueIdInUse(uniqueId)
+  local promise = promise:new()
+
+  MySQL.Async.fetchScalar('SELECT COUNT(*) FROM characters WHERE unique_id = ?', { uniqueId }, function(count)
+    if count > 0 then
+      promise:resolve(true)
+    else
+      promise:resolve(false)
+    end
+  end)
+
+  return Citizen.Await(promise)
 end
 
 --- Get a valid unique id for the character
@@ -15,6 +29,7 @@ local function GetValidUniqueId()
 
   repeat
     attempts += 1
+    ambitionsPrint.debug('Attempting to generate a valid unique id, attempt: ', attempts)
     if attempts > maxAttempts then
       ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId, ' after ', maxAttempts, ' attempts')
       return nil
