@@ -22,16 +22,15 @@ local function CheckFirstSpawn()
 
   MySQL.Async.fetchScalar('SELECT id FROM users WHERE license = ?', { PLAYER_LICENSE }, function(result)
     if not result then
-      ambitionsPrint.error('Failed to get User Id for license: ', PLAYER_LICENSE)
-      DropPlayer(SESSION_ID, 'Failed to get your user id, please contact an administrator.')
-      return
+      ambitionsPrint.info('No user found for license: ', PLAYER_LICENSE, ' creating new user')
     end
-    ambitionsPrint.debug('User Id for license: ', PLAYER_LICENSE, ' is: ', result)
+
+    ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
   end)
 end
 
 
-AddEventHandler('ambitions:server:checkFirstSpawn', function()
+RegisterNetEvent('ambitions:server:checkFirstSpawn', function()
   ambitionsPrint.debug('Checking first spawn')
   CheckFirstSpawn()
 end)
