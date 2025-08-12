@@ -1,6 +1,6 @@
---- Get all identifiers for a player and return them in a structured table
+--- Get all identifiers for a player and return them in a structured table with values only
 ---@param playerId string|number The server ID of the player
----@return table identifiers Table containing all player identifiers organized by type
+---@return table identifiers Table containing all player identifiers with only the values (no prefixes)
 local function getAllIdentifiers(playerId)
     local rawIdentifiers = GetPlayerIdentifiers(playerId)
     if not rawIdentifiers then
@@ -11,11 +11,10 @@ local function getAllIdentifiers(playerId)
 
     for i = 1, #rawIdentifiers do
         local identifier = rawIdentifiers[i]
-        local colonPos = identifier:find(":")
-
-        if colonPos then
-            local identifierType = identifier:sub(1, colonPos - 1)
-            identifiers[identifierType] = identifier
+        local identifierType, identifierValue = identifier:match("^([^:]+):(.+)$")
+        
+        if identifierType and identifierValue then
+            identifiers[identifierType] = identifierValue
         end
     end
 
@@ -35,11 +34,11 @@ local identifiers = {}
 
 --- Get identifiers object for a player with direct access to all identifier types
 ---@param playerId string|number The server ID of the player
----@return table identifiers Object with direct access to .license, .steam, .discord, etc.
+---@return table identifiers Object with direct access to .license, .steam, .discord, etc. (values only, no prefixes)
 function identifiers.get(playerId)
     local obj = {
         --- Get all identifiers for this player
-        ---@return table allIdentifiers Table with all identifiers organized by type
+        ---@return table allIdentifiers Table with all identifiers organized by type (values only)
         getAll = function()
             return getAllIdentifiers(playerId)
         end,
@@ -59,8 +58,14 @@ function identifiers.get(playerId)
                 return rawget(obj, key)
             end
 
-            -- Sinon, récupérer l'identifiant du type demandé
-            return GetPlayerIdentifierByType(playerId, key)
+            -- Sinon, récupérer l'identifiant du type demandé et extraire la valeur
+            local fullIdentifier = GetPlayerIdentifierByType(playerId, key)
+            if not fullIdentifier then
+                return nil
+            end
+            
+            local _, identifierValue = fullIdentifier:match("^([^:]+):(.+)$")
+            return identifierValue or fullIdentifier
         end
     })
 
