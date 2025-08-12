@@ -1,4 +1,5 @@
 local ambitionsPrint = require('lib.log.ambition-print')
+local identifiers = require('server.lib.player.identifiers')
 
 local function FirstSpawn()
 
@@ -9,7 +10,8 @@ local function RegularSpawn()
 end
 
 local function CheckFirstSpawn()
-
+  local playerIdentifiers = identifiers.get(source).getAll()
+  ambitionsPrint.debug('Player identifiers: ' .. playerIdentifiers)
 end
 
 
