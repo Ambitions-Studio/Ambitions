@@ -1,8 +1,26 @@
 local ambitionsPrint = require('shared.lib.log.print')
 local identifiers = require('server.lib.player.identifiers')
 
-local function FirstSpawn()
+local function FirstSpawn(sessionId, identifiers)
+  local PLAYER_LICENSE <const> = identifiers.license
+  local PLAYER_DISCORD_ID <const> = identifiers.discord
+  local PLAYER_IP <const> = identifiers.ip
 
+  if not PLAYER_LICENSE or not PLAYER_DISCORD_ID or not PLAYER_IP then
+    ambitionsPrint.error('failed to get mandatory identifiers for player: ', sessionId)
+    DropPlayer(sessionId, 'Failed to get your identifiers, please contact an administrator.')
+    return
+  end
+
+  MySQL.Async.execute('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP }, function(affectedRows)
+    if not affectedRows then
+      ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
+      DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
+      return
+    end
+
+    ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, affected rows: ', affectedRows)
+  end)
 end
 
 local function RegularSpawn()
@@ -22,7 +40,7 @@ local function CheckFirstSpawn()
 
   MySQL.Async.fetchScalar('SELECT id FROM users WHERE license = ?', { PLAYER_LICENSE }, function(result)
     if not result then
-      ambitionsPrint.info('No user found for license: ', PLAYER_LICENSE, ' creating new user')
+      FirstSpawn(SESSION_ID, PLAYER_IDENTIFIERS)
     end
 
     ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
