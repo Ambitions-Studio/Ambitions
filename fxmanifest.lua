@@ -22,6 +22,10 @@ server_scripts {
     'server/init.lua',
 }
 
+client_scripts {
+    'client/modules/core/spawnPlayer.lua',
+}
+
 files {
     'verification.lua',
     'importation.lua',
