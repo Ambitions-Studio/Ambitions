@@ -1,7 +1,44 @@
 local ambitionsPrint = require('shared.lib.log.print')
 local identifiers = require('server.lib.player.identifiers')
+local random = require('shared.lib.math.random')
+local spawnConfig = require('config.spawn')
 
-local function FirstSpawn(sessionId, identifiers)
+local function GenerateUniqueId()
+end
+
+--- Get a valid unique id for the character
+---@return string | nil uniqueId The unique id or nil if failed to generate a valid unique id
+local function GetValidUniqueId()
+  local uniqueId
+  local attempts = 0
+  local maxAttempts = 10
+
+  repeat
+    attempts += 1
+    if attempts > maxAttempts then
+      ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId, ' after ', maxAttempts, ' attempts')
+      return nil
+    end
+
+    uniqueId = random.alphanumeric(6)
+  until not isUniqueIdInUse(uniqueId)
+
+  ambitionsPrint.info('Generated valid unique id: ', uniqueId)
+
+  return uniqueId
+end
+
+--- Create a new character in the database
+---@param sessionId number The session id of the player
+---@param userId number The user id of the player
+local function CreateCharacter(sessionId, userId)
+  GetValidUniqueId()
+end
+
+--- Create a new user in the database
+---@param sessionId number The session id of the player
+---@param identifiers table The identifiers of the player
+local function CreateUser(sessionId, identifiers)
   local PLAYER_LICENSE <const> = identifiers.license
   local PLAYER_DISCORD_ID <const> = identifiers.discord
   local PLAYER_IP <const> = identifiers.ip
@@ -12,7 +49,7 @@ local function FirstSpawn(sessionId, identifiers)
     return
   end
 
-  MySQL.Async.insert('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP }, function(userId)
+  MySQL.Async.insert('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?)', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP }, function(userId)
     if not userId then
       ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
       DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
@@ -20,13 +57,15 @@ local function FirstSpawn(sessionId, identifiers)
     end
 
     ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, id: ', userId)
+    CreateCharacter(sessionId, userId)
   end)
 end
 
-local function RegularSpawn()
+local function RetrieveUserData()
 
 end
 
+--- Check if the player is a new user or not and create a new user if needed or retrieve all the user data if the user already exists
 local function CheckFirstSpawn()
   local SESSION_ID <const> = source
   local PLAYER_IDENTIFIERS <const> = identifiers.get(SESSION_ID)
@@ -40,9 +79,10 @@ local function CheckFirstSpawn()
 
   MySQL.Async.fetchScalar('SELECT id FROM users WHERE license = ?', { PLAYER_LICENSE }, function(result)
     if not result then
-      FirstSpawn(SESSION_ID, PLAYER_IDENTIFIERS)
+      CreateUser(SESSION_ID, PLAYER_IDENTIFIERS)
     else
       ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
+      RetrieveUserData()
     end
   end)
 end
