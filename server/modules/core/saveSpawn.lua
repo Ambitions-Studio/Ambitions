@@ -1,7 +1,7 @@
 local ambitionsPrint = require('shared.lib.log.print')
 local identifiers = require('server.lib.player.identifiers')
 local random = require('shared.lib.math.random')
-local spawnConfig = require('config.spawn')
+-- local spawnConfig = require('config.spawn')
 
 --- Check if the unique id is already in use by a character
 ---@param uniqueId string The unique id to check
@@ -21,8 +21,9 @@ local function isUniqueIdInUse(uniqueId)
 end
 
 --- Get a valid unique id for the character
+---@param sessionId number The session id of the player
 ---@return string | nil uniqueId The unique id or nil if failed to generate a valid unique id
-local function GetValidUniqueId()
+local function GetValidUniqueId(sessionId)
   local uniqueId
   local attempts = 0
   local maxAttempts = 10
@@ -47,7 +48,7 @@ end
 ---@param sessionId number The session id of the player
 ---@param userId number The user id of the player
 local function CreateCharacter(sessionId, userId)
-  GetValidUniqueId()
+  local uniqueId = GetValidUniqueId(sessionId)
 end
 
 --- Create a new user in the database
