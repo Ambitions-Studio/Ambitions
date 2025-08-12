@@ -12,14 +12,14 @@ local function FirstSpawn(sessionId, identifiers)
     return
   end
 
-  MySQL.Async.execute('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP }, function(affectedRows)
-    if not affectedRows then
+  MySQL.Async.insert('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP }, function(userId)
+    if not userId then
       ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
       DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
       return
     end
 
-    ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, affected rows: ', affectedRows)
+    ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, id: ', userId)
   end)
 end
 
@@ -41,14 +41,13 @@ local function CheckFirstSpawn()
   MySQL.Async.fetchScalar('SELECT id FROM users WHERE license = ?', { PLAYER_LICENSE }, function(result)
     if not result then
       FirstSpawn(SESSION_ID, PLAYER_IDENTIFIERS)
+    else
+      ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
     end
-
-    ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
   end)
 end
 
 
 RegisterNetEvent('ambitions:server:checkFirstSpawn', function()
-  ambitionsPrint.debug('Checking first spawn')
   CheckFirstSpawn()
 end)
