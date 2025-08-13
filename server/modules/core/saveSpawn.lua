@@ -4,6 +4,7 @@ local random = require('shared.lib.math.random')
 local spawnConfig = require('config.spawn')
 local userObject = require('server.classes.userObject')
 local characterObject = require('server.classes.characterObject')
+local playerCache = require('server.lib.cache.player')
 
 --- Check if the unique id is already in use by a character
 ---@param uniqueId string The unique id to check
@@ -24,7 +25,6 @@ local function GetValidUniqueId(sessionId)
   for _ = 1, maxAttempts do
     uniqueId = random.alphanumeric(6)
     if not isUniqueIdInUse(uniqueId) then
-      ambitionsPrint.info('Generated valid unique id: ', uniqueId)
       return uniqueId
     end
   end
@@ -56,17 +56,18 @@ local function CreateCharacter(sessionId, userId, ambitionsUser)
     return
   end
 
-  local characterId = MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, characterData.uniqueId, characterData.group, characterData.pedModel, characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading })
-
-  ambitionsPrint.success('Character with id: ', characterId, ' has been created for user with id: ', userId)
+  MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, characterData.uniqueId, characterData.group, characterData.pedModel, characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading })
 
   local ambitionsCharacter = characterObject(sessionId, characterData.uniqueId, characterData)
   ambitionsUser:addCharacter(ambitionsCharacter)
   ambitionsUser:setCurrentCharacter(characterData.uniqueId)
   ambitionsUser:getCurrentCharacter():setActive(true)
 
-  ambitionsPrint.debug('Character object created: ', ambitionsCharacter)
-  ambitionsPrint.debug('User object fully created: ', ambitionsUser)
+  playerCache.add(sessionId, ambitionsUser)
+
+  ambitionsPrint.debug('Player added to cache: ', sessionId)
+  ambitionsPrint.debug('Player cache: ', playerCache.get(sessionId))
+  ambitionsPrint.debug('All players in cache : ', playerCache.getAll())
 
   TriggerClientEvent('ambitions:client:playerLoaded', sessionId, characterData.pedModel, vector4(characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading))
 end
@@ -92,12 +93,9 @@ local function CreateUser(sessionId, identifiers)
     return
   end
 
-  ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, id: ', userId)
-
   local ambitionsUser = userObject(sessionId, PLAYER_LICENSE)
   ambitionsUser:setIdentifiers(identifiers)
 
-  ambitionsPrint.debug('User object created: ', ambitionsUser)
   CreateCharacter(sessionId, userId, ambitionsUser)
 end
 
