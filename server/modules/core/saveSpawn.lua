@@ -2,6 +2,8 @@ local ambitionsPrint = require('shared.lib.log.print')
 local identifiers = require('server.lib.player.identifiers')
 local random = require('shared.lib.math.random')
 local spawnConfig = require('config.spawn')
+local userObject = require('server.classes.userObject')
+local characterObject = require('server.classes.characterObject')
 
 --- Check if the unique id is already in use by a character
 ---@param uniqueId string The unique id to check
@@ -34,28 +36,39 @@ end
 --- Create a new character in the database
 ---@param sessionId number The session id of the player
 ---@param userId number The user id of the player
-local function CreateCharacter(sessionId, userId)
-  local uniqueId = GetValidUniqueId(sessionId)
-  local group = 'user'
-  local pedModel = spawnConfig.defaultModel
-  local spawnPosition = {
-    x = spawnConfig.defaultSpawnPosition.x,
-    y = spawnConfig.defaultSpawnPosition.y,
-    z = spawnConfig.defaultSpawnPosition.z,
-    heading = spawnConfig.defaultSpawnPosition.w
+---@param ambitionsUser AmbitionsUserObject The user object
+local function CreateCharacter(sessionId, userId, ambitionsUser)
+  local characterData = {
+    uniqueId = GetValidUniqueId(sessionId),
+    group = 'user',
+    pedModel = spawnConfig.defaultModel,
+    spawnPosition = {
+      x = spawnConfig.defaultSpawnPosition.x,
+      y = spawnConfig.defaultSpawnPosition.y,
+      z = spawnConfig.defaultSpawnPosition.z,
+      heading = spawnConfig.defaultSpawnPosition.w
+    }
   }
 
-  if not uniqueId then
+  if not characterData.uniqueId then
     ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId)
     DropPlayer(sessionId, 'Failed to generate a valid unique id, please contact an administrator.')
     return
   end
 
-  local characterId = MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, uniqueId, group, pedModel, spawnPosition.x, spawnPosition.y, spawnPosition.z, spawnPosition.heading })
+  local characterId = MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, characterData.uniqueId, characterData.group, characterData.pedModel, characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading })
 
   ambitionsPrint.success('Character with id: ', characterId, ' has been created for user with id: ', userId)
 
-  TriggerClientEvent('ambitions:client:playerLoaded', sessionId, pedModel, vector4(spawnPosition.x, spawnPosition.y, spawnPosition.z, spawnPosition.heading))
+  local ambitionsCharacter = characterObject(sessionId, characterData.uniqueId, characterData)
+  ambitionsUser:addCharacter(ambitionsCharacter)
+  ambitionsUser:setCurrentCharacter(characterData.uniqueId)
+  ambitionsUser:getCurrentCharacter():setActive(true)
+
+  ambitionsPrint.debug('Character object created: ', ambitionsCharacter)
+  ambitionsPrint.debug('User object fully created: ', ambitionsUser)
+
+  TriggerClientEvent('ambitions:client:playerLoaded', sessionId, characterData.pedModel, vector4(characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading))
 end
 
 --- Create a new user in the database
@@ -80,7 +93,12 @@ local function CreateUser(sessionId, identifiers)
   end
 
   ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, id: ', userId)
-  CreateCharacter(sessionId, userId)
+
+  local ambitionsUser = userObject(sessionId, PLAYER_LICENSE)
+  ambitionsUser:setIdentifiers(identifiers)
+
+  ambitionsPrint.debug('User object created: ', ambitionsUser)
+  CreateCharacter(sessionId, userId, ambitionsUser)
 end
 
 local function RetrieveUserData()
