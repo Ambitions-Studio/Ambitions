@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `discord_id` VARCHAR(60) NOT NULL UNIQUE,
   `ip` VARCHAR(40) NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_license` (`license`),
   INDEX `idx_discord_id` (`discord_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

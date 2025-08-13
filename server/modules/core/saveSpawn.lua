@@ -1,23 +1,16 @@
 local ambitionsPrint = require('shared.lib.log.print')
 local identifiers = require('server.lib.player.identifiers')
 local random = require('shared.lib.math.random')
--- local spawnConfig = require('config.spawn')
+local spawnConfig = require('config.spawn')
 
 --- Check if the unique id is already in use by a character
 ---@param uniqueId string The unique id to check
 ---@return boolean isInUse True if the unique id is in use, false otherwise
 local function isUniqueIdInUse(uniqueId)
-  local promise = promise:new()
 
-  MySQL.Async.fetchScalar('SELECT COUNT(*) FROM characters WHERE unique_id = ?', { uniqueId }, function(count)
-    if count > 0 then
-      promise:resolve(true)
-    else
-      promise:resolve(false)
-    end
-  end)
+  local count = MySQL.scalar.await('SELECT COUNT(*) FROM characters WHERE unique_id = ?', { uniqueId })
 
-  return Citizen.Await(promise)
+  return count > 0
 end
 
 --- Get a valid unique id for the character
@@ -25,23 +18,17 @@ end
 ---@return string | nil uniqueId The unique id or nil if failed to generate a valid unique id
 local function GetValidUniqueId(sessionId)
   local uniqueId
-  local attempts = 0
   local maxAttempts = 10
-
-  repeat
-    attempts += 1
-    ambitionsPrint.debug('Attempting to generate a valid unique id, attempt: ', attempts)
-    if attempts > maxAttempts then
-      ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId, ' after ', maxAttempts, ' attempts')
-      return nil
-    end
-
+  for _ = 1, maxAttempts do
     uniqueId = random.alphanumeric(6)
-  until not isUniqueIdInUse(uniqueId)
+    if not isUniqueIdInUse(uniqueId) then
+      ambitionsPrint.info('Generated valid unique id: ', uniqueId)
+      return uniqueId
+    end
+  end
 
-  ambitionsPrint.info('Generated valid unique id: ', uniqueId)
-
-  return uniqueId
+  ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId, ' after ', maxAttempts, ' attempts')
+  return nil
 end
 
 --- Create a new character in the database
@@ -49,6 +36,26 @@ end
 ---@param userId number The user id of the player
 local function CreateCharacter(sessionId, userId)
   local uniqueId = GetValidUniqueId(sessionId)
+  local group = 'user'
+  local pedModel = spawnConfig.defaultModel
+  local spawnPosition = {
+    x = spawnConfig.defaultSpawnPosition.x,
+    y = spawnConfig.defaultSpawnPosition.y,
+    z = spawnConfig.defaultSpawnPosition.z,
+    heading = spawnConfig.defaultSpawnPosition.w
+  }
+
+  if not uniqueId then
+    ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId)
+    DropPlayer(sessionId, 'Failed to generate a valid unique id, please contact an administrator.')
+    return
+  end
+
+  local characterId = MySQL.insert.await('INSERT INTO characters (user_id, unique_id, group, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, uniqueId, group, pedModel, spawnPosition.x, spawnPosition.y, spawnPosition.z, spawnPosition.heading })
+
+  ambitionsPrint.success('Character with id: ', characterId, ' has been created for user with id: ', userId)
+
+  TriggerClientEvent('ambitions:client:playerLoaded', sessionId, pedModel, vector4(spawnPosition.x, spawnPosition.y, spawnPosition.z, spawnPosition.heading))
 end
 
 --- Create a new user in the database
@@ -65,16 +72,15 @@ local function CreateUser(sessionId, identifiers)
     return
   end
 
-  MySQL.Async.insert('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?)', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP }, function(userId)
-    if not userId then
-      ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
-      DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
-      return
-    end
+  local userId = MySQL.insert.await('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?)', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP })
+  if not userId then
+    ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
+    DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
+    return
+  end
 
-    ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, id: ', userId)
-    CreateCharacter(sessionId, userId)
-  end)
+  ambitionsPrint.info('User with license : ', PLAYER_LICENSE, ' has been created, id: ', userId)
+  CreateCharacter(sessionId, userId)
 end
 
 local function RetrieveUserData()
