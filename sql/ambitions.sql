@@ -1,5 +1,3 @@
-lUSE `ambitions_work`;
-
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `license` VARCHAR(60) NOT NULL UNIQUE,
@@ -11,8 +9,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_license` (`license`),
   INDEX `idx_discord_id` (`discord_id`),
-  INDEX `idx_last_seen` (`last_seen`),
-  FOREIGN KEY (`last_played_character`) REFERENCES `characters`(`unique_id`) ON DELETE SET NULL
+  INDEX `idx_last_seen` (`last_seen`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `characters`(
@@ -32,3 +29,7 @@ CREATE TABLE IF NOT EXISTS `characters`(
   INDEX `idx_unique_id` (`unique_id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Add foreign key constraint after both tables exist
+ALTER TABLE `users` ADD CONSTRAINT `fk_last_played_character` 
+FOREIGN KEY (`last_played_character`) REFERENCES `characters`(`unique_id`) ON DELETE SET NULL;
