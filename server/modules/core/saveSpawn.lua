@@ -51,7 +51,7 @@ local function CreateCharacter(sessionId, userId)
     return
   end
 
-  local characterId = MySQL.insert.await('INSERT INTO characters (user_id, unique_id, group, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, uniqueId, group, pedModel, spawnPosition.x, spawnPosition.y, spawnPosition.z, spawnPosition.heading })
+  local characterId = MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, uniqueId, group, pedModel, spawnPosition.x, spawnPosition.y, spawnPosition.z, spawnPosition.heading })
 
   ambitionsPrint.success('Character with id: ', characterId, ' has been created for user with id: ', userId)
 
