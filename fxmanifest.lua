@@ -21,6 +21,7 @@ server_scripts {
 
     'server/init.lua',
     'server/modules/core/saveSpawn.lua',
+    'server/modules/core/savePlayer.lua',
 }
 
 client_scripts {
