@@ -38,16 +38,21 @@ local function SaveCharacterData(characterObject)
     return false
   end
 
-  local currentPosition = characterObject:getPosition(false, true)
+  -- Get current position directly from game natives like your old code
+  local sessionId = characterObject:getSessionId()
+  local ped = GetPlayerPed(sessionId)
+  local pedPositions = GetEntityCoords(ped)
+  local pedHeading = GetEntityHeading(ped)
+  
   local playtime = characterObject:getPlaytime()
   local pedModel = characterObject:getPedModel()
   local uniqueId = characterObject:getUniqueId()
 
-  -- Round coordinates to avoid scientific notation in database
-  local roundedX = round(currentPosition.x, 2)
-  local roundedY = round(currentPosition.y, 2)
-  local roundedZ = round(currentPosition.z, 2)
-  local roundedHeading = round(currentPosition.heading, 2)
+  -- Round coordinates to avoid scientific notation in database (4 decimals like your old code)
+  local roundedX = round(pedPositions.x, 4)
+  local roundedY = round(pedPositions.y, 4)
+  local roundedZ = round(pedPositions.z, 4)
+  local roundedHeading = round(pedHeading, 4)
   local roundedPlaytime = round(playtime)
 
   local success = MySQL.update.await(
