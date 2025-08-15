@@ -1,4 +1,5 @@
 local ambitionsPrint = require('shared.lib.log.print')
+local playerCache = require('server.lib.cache.player')
 
 --- Save a player when they drop from the server
 ---@param sessionId number The session ID of the player
