@@ -38,21 +38,21 @@ local function SaveCharacterData(characterObject)
     return false
   end
 
-  -- Get current position directly from game natives like your old code
-  local sessionId = characterObject:getSessionId()
-  local ped = GetPlayerPed(sessionId)
-  local pedPositions = GetEntityCoords(ped)
-  local pedHeading = GetEntityHeading(ped)
-  
   local playtime = characterObject:getPlaytime()
   local pedModel = characterObject:getPedModel()
   local uniqueId = characterObject:getUniqueId()
 
+  -- Use stored position instead of live position (player might be disconnecting)
+  local storedPosition = characterObject.position
+  
+  -- Debug prints to see what we're getting
+  ambitionsPrint.debug('Saving position for ', uniqueId, ': ', storedPosition)
+
   -- Round coordinates to avoid scientific notation in database (4 decimals like your old code)
-  local roundedX = round(pedPositions.x, 4)
-  local roundedY = round(pedPositions.y, 4)
-  local roundedZ = round(pedPositions.z, 4)
-  local roundedHeading = round(pedHeading, 4)
+  local roundedX = round(storedPosition.x, 4)
+  local roundedY = round(storedPosition.y, 4)
+  local roundedZ = round(storedPosition.z, 4)
+  local roundedHeading = round(storedPosition.heading, 4)
   local roundedPlaytime = round(playtime)
 
   local success = MySQL.update.await(
