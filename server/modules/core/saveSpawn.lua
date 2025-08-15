@@ -80,13 +80,13 @@ local function CreateUser(sessionId, identifiers)
   local PLAYER_DISCORD_ID <const> = identifiers.discord
   local PLAYER_IP <const> = identifiers.ip
 
-  if not PLAYER_LICENSE or not PLAYER_DISCORD_ID or not PLAYER_IP then
+  if not PLAYER_LICENSE or not PLAYER_IP then
     ambitionsPrint.error('failed to get mandatory identifiers for player: ', sessionId)
     DropPlayer(sessionId, 'Failed to get your identifiers, please contact an administrator.')
     return
   end
 
-  local userId = MySQL.insert.await('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?)', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP })
+  local userId = MySQL.insert.await('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?)', { PLAYER_LICENSE, PLAYER_DISCORD_ID or NULL, PLAYER_IP })
   if not userId then
     ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
     DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
