@@ -1,5 +1,6 @@
 local ambitionsPrint = require('shared.lib.log.print')
 local playerCache = require('server.lib.cache.player')
+local round = require('shared.lib.math.round')
 
 --- Save user data to database
 ---@param license string The player's license
@@ -42,9 +43,16 @@ local function SaveCharacterData(characterObject)
   local pedModel = characterObject:getPedModel()
   local uniqueId = characterObject:getUniqueId()
 
+  -- Round coordinates to avoid scientific notation in database
+  local roundedX = round(currentPosition.x, 2)
+  local roundedY = round(currentPosition.y, 2)
+  local roundedZ = round(currentPosition.z, 2)
+  local roundedHeading = round(currentPosition.heading, 2)
+  local roundedPlaytime = round(playtime)
+
   local success = MySQL.update.await(
     'UPDATE characters SET ped_model = ?, position_x = ?, position_y = ?, position_z = ?, heading = ?, playtime = ?, last_played = NOW() WHERE unique_id = ?',
-    { pedModel, currentPosition.x, currentPosition.y, currentPosition.z, currentPosition.heading, playtime, uniqueId }
+    { pedModel, roundedX, roundedY, roundedZ, roundedHeading, roundedPlaytime, uniqueId }
   )
 
   if success > 0 then
