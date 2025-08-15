@@ -42,13 +42,10 @@ local function SaveCharacterData(characterObject)
   local pedModel = characterObject:getPedModel()
   local uniqueId = characterObject:getUniqueId()
 
-  -- Use stored position instead of live position (player might be disconnecting)
   local storedPosition = characterObject.position
-  
-  -- Debug prints to see what we're getting
+
   ambitionsPrint.debug('Saving position for ', uniqueId, ': ', storedPosition)
 
-  -- Round coordinates to avoid scientific notation in database (4 decimals like your old code)
   local roundedX = round(storedPosition.x, 4)
   local roundedY = round(storedPosition.y, 4)
   local roundedZ = round(storedPosition.z, 4)
@@ -67,6 +64,43 @@ local function SaveCharacterData(characterObject)
     ambitionsPrint.error('Failed to save character data for ID: ', uniqueId)
     return false
   end
+end
+
+--- Update cache with live data before saving
+---@param sessionId number The session ID of the player
+---@param playerObject AmbitionsUserObject The player object
+---@return boolean success Whether the cache update was successful
+local function UpdateCacheBeforeSave(sessionId, playerObject)
+  local CHARACTER_OBJECT = playerObject:getCurrentCharacter()
+
+  if not CHARACTER_OBJECT then
+    ambitionsPrint.error('No character object to update cache for player: ', sessionId)
+    return false
+  end
+
+  local ped = GetPlayerPed(sessionId)
+  if ped and ped > 0 then
+    local pedPositions = GetEntityCoords(ped)
+    local pedHeading = GetEntityHeading(ped)
+
+    CHARACTER_OBJECT.position = {
+      x = pedPositions.x,
+      y = pedPositions.y,
+      z = pedPositions.z,
+      heading = pedHeading
+    }
+
+    ambitionsPrint.debug('Updated cache position for ', CHARACTER_OBJECT:getUniqueId(), ': ', CHARACTER_OBJECT.position)
+  else
+    ambitionsPrint.warning('Could not get live position for player: ', sessionId, ' - using stored position')
+  end
+
+  CHARACTER_OBJECT:updatePlaytime()
+
+  playerObject:updateLastSeen()
+
+  ambitionsPrint.debug('Cache updated successfully for player: ', sessionId)
+  return true
 end
 
 --- Save a player when they drop from the server
@@ -88,7 +122,10 @@ local function SavePlayerDropped(sessionId, playerObject)
 
   ambitionsPrint.info('Saving player ', GetPlayerName(sessionId), ' before disconnect')
 
-  CHARACTER_OBJECT:updatePlaytime()
+  local cacheUpdated = UpdateCacheBeforeSave(sessionId, playerObject)
+  if not cacheUpdated then
+    ambitionsPrint.warning('Cache update failed for player: ', sessionId, ' - proceeding with stored data')
+  end
 
   local userSaved = SaveUserData(PLAYER_LICENSE, playerObject)
   local characterSaved = SaveCharacterData(CHARACTER_OBJECT)
