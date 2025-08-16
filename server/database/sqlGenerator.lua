@@ -87,8 +87,9 @@ local function GenerateCreateTableSQL(tableName, tableConfig, globalConfig)
   local sql = "CREATE TABLE IF NOT EXISTS `" .. tableName .. "` (\n"
   local definitions = {}
 
-  for columnName, columnConfig in pairs(tableConfig.columns) do
-    table.insert(definitions, "  " .. GenerateColumnDefinition(columnName, columnConfig))
+  -- Use ipairs to maintain column order
+  for _, columnConfig in ipairs(tableConfig.columns) do
+    table.insert(definitions, "  " .. GenerateColumnDefinition(columnConfig.name, columnConfig))
   end
 
   if tableConfig.indexes then
