@@ -75,7 +75,7 @@ end
 local function ExecuteSQL(sql, description)
   ambitionsPrint.info('Executing: ' .. description)
 
-  local success = pcall(function()
+  local success, error = pcall(function()
     MySQL.query.await(sql)
   end)
 
@@ -85,6 +85,7 @@ local function ExecuteSQL(sql, description)
     return true
   else
     ambitionsPrint.error('✗ Failed: ' .. description)
+    ambitionsPrint.error('Error: ' .. tostring(error))
     ambitionsPrint.error('SQL: ' .. sql)
 
     return false

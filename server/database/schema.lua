@@ -10,47 +10,55 @@ return {
   tables = {
     users = {
       columns = {
-        id = {
+        {
+          name = "id",
           type = "INT",
           autoIncrement = true,
           primaryKey = true
         },
-        license = {
+        {
+          name = "license",
           type = "VARCHAR",
           length = 60,
           notNull = true,
           unique = true
         },
-        discord_id = {
+        {
+          name = "discord_id",
           type = "VARCHAR", 
           length = 60,
           notNull = true,
           unique = true
         },
-        ip = {
+        {
+          name = "ip",
           type = "VARCHAR",
           length = 40,
           notNull = true
         },
-        last_seen = {
+        {
+          name = "last_seen",
           type = "TIMESTAMP",
           notNull = true,
           default = "CURRENT_TIMESTAMP",
           onUpdate = "CURRENT_TIMESTAMP"
         },
-        last_played_character = {
+        {
+          name = "last_played_character",
           type = "VARCHAR",
           length = 15,
           null = true
         },
-        total_playtime = {
+        {
+          name = "total_playtime",
           type = "INT",
           unsigned = true,
           notNull = true,
           default = 0,
           comment = "Total playtime in seconds"
         },
-        created_at = {
+        {
+          name = "created_at",
           type = "TIMESTAMP",
           notNull = true,
           default = "CURRENT_TIMESTAMP"
@@ -85,60 +93,72 @@ return {
 
     characters = {
       columns = {
-        id = {
+        {
+          name = "id",
           type = "INT",
           autoIncrement = true,
           primaryKey = true
         },
-        user_id = {
+        {
+          name = "user_id",
           type = "INT",
           notNull = true
         },
-        unique_id = {
+        {
+          name = "unique_id",
           type = "VARCHAR",
           length = 15,
           notNull = true,
           unique = true
         },
-        group = {
+        {
+          name = "group",
           type = "VARCHAR",
           length = 40,
           notNull = true
         },
-        ped_model = {
+        {
+          name = "ped_model",
           type = "VARCHAR",
           length = 60,
           notNull = true
         },
-        position_x = {
+        {
+          name = "position_x",
           type = "FLOAT",
           notNull = true
         },
-        position_y = {
+        {
+          name = "position_y",
           type = "FLOAT",
           notNull = true
         },
-        position_z = {
+        {
+          name = "position_z",
           type = "FLOAT",
           notNull = true
         },
-        heading = {
+        {
+          name = "heading",
           type = "FLOAT",
           notNull = true
         },
-        playtime = {
+        {
+          name = "playtime",
           type = "INT",
           unsigned = true,
           notNull = true,
           default = 0,
           comment = "Character playtime in seconds"
         },
-        created_at = {
+        {
+          name = "created_at",
           type = "TIMESTAMP",
           notNull = true,
           default = "CURRENT_TIMESTAMP"
         },
-        last_played = {
+        {
+          name = "last_played",
           type = "TIMESTAMP",
           notNull = true,
           default = "CURRENT_TIMESTAMP",
@@ -171,18 +191,21 @@ return {
     -- Table for migration tracking
     schema_migrations = {
       columns = {
-        id = {
+        {
+          name = "id",
           type = "INT",
           autoIncrement = true,
           primaryKey = true
         },
-        version = {
+        {
+          name = "version",
           type = "VARCHAR",
           length = 50,
           notNull = true,
           unique = true
         },
-        applied_at = {
+        {
+          name = "applied_at",
           type = "TIMESTAMP",
           notNull = true,
           default = "CURRENT_TIMESTAMP"
