@@ -81,10 +81,22 @@ function log.success(...)
     print_log('success', ...)
 end
 
---- Print an error log message.
+--- Print an error log message and throw a Lua error with stack trace.
 ---@vararg any The message(s) or variable(s) to print.
 function log.error(...)
-    print_log('error', ...)
+    local args = { ... }
+    local out = {}
+
+    for i = 1, #args do
+        out[#out+1] = serialize(args[i], 0)
+    end
+
+    local errorMessage = table.concat(out, ' ')
+    local lvl = LOG_LEVELS.error
+
+    print(("%s[%s]^7: %s"):format(lvl.color, lvl.label, errorMessage))
+
+    error(errorMessage, 2)
 end
 
 --- Print a warning log message.
