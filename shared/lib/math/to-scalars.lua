@@ -40,9 +40,11 @@ local function detectSeparator(input)
 
   for _, sep in ipairs(COMMON_SEPARATORS) do
     local count = 0
+
     for _ in string.gmatch(input, sep) do
       count = count + 1
     end
+
     if count > 0 then
       separatorCounts[sep] = count
     end
@@ -113,8 +115,10 @@ function ambitionsToScalars.auto(input)
   end
 
   local separator = detectSeparator(input)
+
   if not separator then
     local number = tonumber(trimString(input))
+
     return number and {number} or {}
   end
 
@@ -131,6 +135,7 @@ function ambitionsToScalars.toRGB(input)
     local r = math.max(0, math.min(255, math.floor(scalars[1])))
     local g = math.max(0, math.min(255, math.floor(scalars[2])))
     local b = math.max(0, math.min(255, math.floor(scalars[3])))
+
     return r, g, b
   end
 
@@ -148,6 +153,7 @@ function ambitionsToScalars.toRGBA(input)
     local g = math.max(0, math.min(255, math.floor(scalars[2])))
     local b = math.max(0, math.min(255, math.floor(scalars[3])))
     local a = math.max(0, math.min(255, math.floor(scalars[4])))
+
     return r, g, b, a
   end
 
@@ -159,6 +165,7 @@ end
 ---@return number count Number of scalars that would be parsed
 function ambitionsToScalars.count(input)
   local scalars = ambitionsToScalars.auto(input)
+
   return #scalars
 end
 

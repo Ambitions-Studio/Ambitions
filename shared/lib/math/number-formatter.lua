@@ -15,9 +15,11 @@ local function formatIntegerPart(integerStr)
 
   for i = length, 1, -1 do
     local char = integerStr:sub(i, i)
+
     table.insert(result, 1, char)
 
     local positionFromRight = length - i + 1
+
     if positionFromRight % 3 == 0 and i > 1 then
       table.insert(result, 1, SPACE_SEPARATOR)
     end
@@ -36,6 +38,7 @@ local function toValidNumber(value)
     local num = tonumber(value)
     return num
   end
+
   return nil
 end
 
@@ -46,6 +49,7 @@ local ambitionsNumberFormatter = {}
 ---@return string formatted The formatted number string
 function ambitionsNumberFormatter.format(number)
   local validNumber = toValidNumber(number)
+
   if not validNumber then
     return tostring(number)
   end
@@ -70,6 +74,7 @@ function ambitionsNumberFormatter.format(number)
   local formattedInteger = formatIntegerPart(integerPart)
 
   local result = formattedInteger
+
   if decimalPart and #decimalPart > 0 then
     result = result .. DECIMAL_SEPARATOR .. decimalPart
   end
@@ -88,6 +93,7 @@ end
 function ambitionsNumberFormatter.currency(number, currencySymbol)
   currencySymbol = currencySymbol or "$"
   local formatted = ambitionsNumberFormatter.format(number)
+
   return formatted .. " " .. currencySymbol
 end
 
@@ -98,6 +104,7 @@ end
 function ambitionsNumberFormatter.withSeparator(number, separator)
   separator = separator or SPACE_SEPARATOR
   local validNumber = toValidNumber(number)
+
   if not validNumber then
     return tostring(number)
   end
