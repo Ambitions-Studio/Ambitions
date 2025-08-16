@@ -42,7 +42,7 @@ local function CreateCharacter(sessionId, userId, ambitionsUser)
     uniqueId = GetValidUniqueId(sessionId),
     group = 'user',
     pedModel = spawnConfig.defaultModel,
-    spawnPosition = {
+    position = {
       x = spawnConfig.defaultSpawnPosition.x,
       y = spawnConfig.defaultSpawnPosition.y,
       z = spawnConfig.defaultSpawnPosition.z,
@@ -56,7 +56,7 @@ local function CreateCharacter(sessionId, userId, ambitionsUser)
     return
   end
 
-  MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, characterData.uniqueId, characterData.group, characterData.pedModel, characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading })
+  MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, characterData.uniqueId, characterData.group, characterData.pedModel, characterData.position.x, characterData.position.y, characterData.position.z, characterData.position.heading })
 
   local ambitionsCharacter = characterObject(sessionId, characterData.uniqueId, characterData)
   ambitionsUser:addCharacter(ambitionsCharacter)
@@ -69,7 +69,7 @@ local function CreateCharacter(sessionId, userId, ambitionsUser)
   ambitionsPrint.debug('Player cache: ', playerCache.get(sessionId))
   ambitionsPrint.debug('All players in cache : ', playerCache.getAll())
 
-  TriggerClientEvent('ambitions:client:playerLoaded', sessionId, characterData.pedModel, vector4(characterData.spawnPosition.x, characterData.spawnPosition.y, characterData.spawnPosition.z, characterData.spawnPosition.heading))
+  TriggerClientEvent('ambitions:client:playerLoaded', sessionId, characterData.pedModel, vector4(characterData.position.x, characterData.position.y, characterData.position.z, characterData.position.heading))
 end
 
 --- Create a new user in the database
@@ -99,8 +99,81 @@ local function CreateUser(sessionId, identifiers)
   CreateCharacter(sessionId, userId, ambitionsUser)
 end
 
-local function RetrieveUserData()
+--- Load user character from database
+---@param userId number The user ID from database
+---@return table | nil characterData The character data or nil if not found
+local function LoadUserCharacter(userId)
+  local characterData = MySQL.single.await('SELECT * FROM characters WHERE user_id = ? LIMIT 1', { userId })
+  
+  if not characterData then
+    ambitionsPrint.warning('No character found for user ID: ', userId)
+    return nil
+  end
 
+  return {
+    uniqueId = characterData.unique_id,
+    group = characterData.group,
+    pedModel = characterData.ped_model,
+    position = {
+      x = characterData.position_x,
+      y = characterData.position_y,
+      z = characterData.position_z,
+      heading = characterData.heading
+    },
+    playtime = characterData.playtime or 0,
+    lastPlayed = characterData.last_played,
+    createdAt = characterData.created_at
+  }
+end
+
+--- Create user and character objects from database data
+---@param sessionId number The session ID of the player
+---@param playerLicense string The player's license
+---@param playerIdentifiers table All player identifiers
+---@param characterData table The character data from database
+---@return AmbitionsUserObject ambitionsUser The created user object
+local function CreateUserObjects(sessionId, playerLicense, playerIdentifiers, characterData)
+  local ambitionsUser = userObject(sessionId, playerLicense)
+  ambitionsUser:setIdentifiers(playerIdentifiers)
+
+  local ambitionsCharacter = characterObject(sessionId, characterData.uniqueId, characterData)
+  ambitionsUser:addCharacter(ambitionsCharacter)
+  ambitionsUser:setCurrentCharacter(characterData.uniqueId)
+  ambitionsUser:getCurrentCharacter():setActive(true)
+
+  return ambitionsUser
+end
+
+--- Finalize user loading and spawn player
+---@param sessionId number The session ID of the player
+---@param ambitionsUser AmbitionsUserObject The user object
+local function FinalizeUserSpawn(sessionId, ambitionsUser)
+  playerCache.add(sessionId, ambitionsUser)
+
+  local currentCharacter = playerCache.get(sessionId):getCurrentCharacter()
+
+  ambitionsPrint.success('Player ', GetPlayerName(sessionId), ' loaded successfully')
+  ambitionsPrint.debug('Player added to cache: ', sessionId)
+  ambitionsPrint.debug('Character loaded: ', currentCharacter:getUniqueId())
+
+  TriggerClientEvent('ambitions:client:playerLoaded', sessionId, currentCharacter:getPedModel(), vector4(currentCharacter.position.x, currentCharacter.position.y, currentCharacter.position.z, currentCharacter.position.heading))
+end
+
+--- Retrieve existing user data from database and initialize objects
+---@param sessionId number The session ID of the player
+---@param userId number The user ID from database
+---@param playerIdentifiers table All player identifiers
+local function RetrieveUserData(sessionId, userId, playerIdentifiers)
+  local characterData = LoadUserCharacter(userId)
+
+  if not characterData then
+    ambitionsPrint.info('No character found for user, creating new character')
+    DropPlayer(sessionId, 'Failed to retrieve your character, please contact an administrator.')
+    return
+  end
+
+  local ambitionsUser = CreateUserObjects(sessionId, playerIdentifiers.license, playerIdentifiers, characterData)
+  FinalizeUserSpawn(sessionId, ambitionsUser)
 end
 
 --- Check if the player is a new user or not and create a new user if needed or retrieve all the user data if the user already exists
@@ -120,7 +193,7 @@ local function CheckFirstSpawn()
       CreateUser(SESSION_ID, PLAYER_IDENTIFIERS)
     else
       ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
-      RetrieveUserData()
+      RetrieveUserData(SESSION_ID, result, PLAYER_IDENTIFIERS)
     end
   end)
 end
