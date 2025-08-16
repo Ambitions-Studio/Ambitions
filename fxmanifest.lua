@@ -20,6 +20,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
 
     'server/init.lua',
+    'server/database/autoMigration.lua',
     'server/modules/core/saveSpawn.lua',
     'server/modules/core/savePlayer.lua',
 }
