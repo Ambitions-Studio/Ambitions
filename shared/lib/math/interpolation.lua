@@ -97,6 +97,7 @@ function ambitionsInterpolation.create(startValue, endValue, duration)
     end
 
     Wait(FRAME_TIME)
+
     return interpolate(startValue, endValue, progress), progress
   end
 end
@@ -111,6 +112,7 @@ function ambitionsInterpolation.valueAt(startValue, endValue, progress)
   progress = math.max(0, math.min(1, progress))
 
   local valueType = type(startValue)
+
   if valueType == 'number' then
     return interpolateNumber(startValue, endValue, progress)
   elseif valueType == 'table' then

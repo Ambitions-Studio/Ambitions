@@ -16,32 +16,20 @@ lua54 'yes'
 
 shared_script 'importation.lua'
 
-shared_scripts {
-    'shared/initExports.lua',
-
-    'shared/lib/print/log.lua',
-
-    'translations/*.lua',
-
-    'config/shared/*.lua',
-    'shared/lib/**/*.lua',
-}
-
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
 
-    'server/initExports.lua',
-
-    'config/server/*.lua',
-    'server/lib/**/*.lua',
+    'server/init.lua',
+    'server/modules/core/saveSpawn.lua',
+    'server/modules/core/savePlayer.lua',
 }
 
 client_scripts {
-    'client/lib/**/*.lua',
+    'client/modules/core/spawnPlayer.lua',
 }
 
 files {
-    'init.lua',
+    'verification.lua',
     'importation.lua',
 }
 

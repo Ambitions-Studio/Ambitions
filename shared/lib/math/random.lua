@@ -7,6 +7,7 @@ local CHARSET_HEX <const> = "0123456789ABCDEF"
 ---@return number seed Default seed value
 local function getDefaultSeed()
   local gameTimer = GetGameTimer()
+
   return gameTimer + (gameTimer % 1000) * 1000
 end
 
@@ -24,6 +25,7 @@ end
 ---@return number index The selected index based on weights
 local function weightedSelect(weights)
   local totalWeight = 0
+
   for _, weight in ipairs(weights) do
     totalWeight = totalWeight + weight
   end
@@ -46,10 +48,13 @@ end
 ---@return any[] shuffled The same array reference with shuffled elements
 local function shuffleArray(array)
   local n = #array
+
   for i = n, 2, -1 do
     local j = math.random(i)
+
     array[i], array[j] = array[j], array[i]
   end
+
   return array
 end
 
@@ -64,6 +69,7 @@ local function generateString(length, charset)
 
   for i = 1, length do
     local randomIndex = math.random(charsetLength)
+
     result[i] = charset:sub(randomIndex, randomIndex)
   end
 
@@ -93,6 +99,7 @@ end
 function ambitionsRandom.float(min, max)
   min = min or 0
   max = max or 1
+
   return min + (max - min) * math.random()
 end
 
@@ -101,6 +108,7 @@ end
 ---@return boolean result Random boolean value
 function ambitionsRandom.boolean(probability)
   probability = probability or 0.5
+
   return math.random() < probability
 end
 
@@ -112,6 +120,7 @@ function ambitionsRandom.choice(array)
   if #array == 0 then
     return nil
   end
+
   return array[math.random(#array)]
 end
 
@@ -127,12 +136,14 @@ function ambitionsRandom.sample(array, count)
 
   count = math.min(count, #array)
   local shuffled = {}
+
   for i, v in ipairs(array) do
     shuffled[i] = v
   end
 
   shuffleArray(shuffled)
   local result = {}
+
   for i = 1, count do
     result[i] = shuffled[i]
   end
@@ -151,6 +162,7 @@ function ambitionsRandom.weighted(options, weights)
   end
 
   local selectedIndex = weightedSelect(weights)
+
   return options[selectedIndex]
 end
 
@@ -160,9 +172,11 @@ end
 ---@return T[] shuffled New array with shuffled elements
 function ambitionsRandom.shuffle(array)
   local shuffled = {}
+
   for i, v in ipairs(array) do
     shuffled[i] = v
   end
+
   return shuffleArray(shuffled)
 end
 
@@ -182,8 +196,10 @@ end
 ---@return string uuid Generated UUID string
 function ambitionsRandom.uuid()
   local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+
   return template:gsub('[xy]', function(c)
     local value = (c == 'x') and math.random(0, 15) or math.random(8, 11)
+
     return string.format('%x', value)
   end)
 end
