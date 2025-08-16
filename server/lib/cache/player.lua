@@ -15,7 +15,6 @@ function playerCache.add(sessionId, userObject)
   end
 
   cache[sessionId] = userObject
-  ambitionsPrint.debug('Player added to cache: ', sessionId)
 
   return true
 end
@@ -33,7 +32,6 @@ end
 function playerCache.remove(sessionId)
   if cache[sessionId] then
     cache[sessionId] = nil
-    ambitionsPrint.debug('Player removed from cache: ', sessionId)
 
     return true
   end

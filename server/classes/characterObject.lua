@@ -1,4 +1,3 @@
-local ambitionsPrint = require('shared.lib.log.print')
 local spawnConfig = require('config.spawn')
 
 --- Modern Character Object Class to handle the character data
@@ -187,7 +186,6 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
     end
     
     -- TODO: Implement database save logic
-    ambitionsPrint.debug("Saving character data for ID: ", self.uniqueId)
     self:updateLastPlayed()
 
     return true

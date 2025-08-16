@@ -68,10 +68,6 @@ local function CreateCharacter(sessionId, userId, ambitionsUser)
 
   playerCache.add(sessionId, ambitionsUser)
 
-  ambitionsPrint.debug('Player added to cache: ', sessionId)
-  ambitionsPrint.debug('Player cache: ', playerCache.get(sessionId))
-  ambitionsPrint.debug('All players in cache : ', playerCache.getAll())
-
   TriggerClientEvent('ambitions:client:playerLoaded', sessionId, characterData.pedModel, vector4(characterData.position.x, characterData.position.y, characterData.position.z, characterData.position.heading))
 end
 
@@ -163,8 +159,6 @@ local function FinalizeUserSpawn(sessionId, ambitionsUser)
   local currentCharacter = playerCache.get(sessionId):getCurrentCharacter()
 
   ambitionsPrint.success('Player ', GetPlayerName(sessionId), ' loaded successfully')
-  ambitionsPrint.debug('Player added to cache: ', sessionId)
-  ambitionsPrint.debug('Character loaded: ', currentCharacter:getUniqueId())
 
   TriggerClientEvent('ambitions:client:playerLoaded', sessionId, currentCharacter:getPedModel(), vector4(currentCharacter.position.x, currentCharacter.position.y, currentCharacter.position.z, currentCharacter.position.heading))
 end
@@ -177,7 +171,7 @@ local function RetrieveUserData(sessionId, userId, playerIdentifiers)
   local characterData = LoadUserCharacter(userId)
 
   if not characterData then
-    ambitionsPrint.info('No character found for user, creating new character')
+    ambitionsPrint.error('Failed to retrieve your character, please contact an administrator.')
     DropPlayer(sessionId, 'Failed to retrieve your character, please contact an administrator.')
 
     return
@@ -205,7 +199,6 @@ local function CheckFirstSpawn()
     if not result then
       CreateUser(SESSION_ID, PLAYER_IDENTIFIERS)
     else
-      ambitionsPrint.info('User found for license: ', PLAYER_LICENSE, ' id: ', result)
       RetrieveUserData(SESSION_ID, result, PLAYER_IDENTIFIERS)
     end
   end)

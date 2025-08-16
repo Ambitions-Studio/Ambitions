@@ -21,8 +21,6 @@ local function SaveUserData(license, userObject)
   )
 
   if success > 0 then
-    ambitionsPrint.debug('User data saved for license: ', license)
-
     return true
   else
     ambitionsPrint.error('Failed to save user data for license: ', license)
@@ -47,8 +45,6 @@ local function SaveCharacterData(characterObject)
 
   local storedPosition = characterObject.position
 
-  ambitionsPrint.debug('Saving position for ', uniqueId, ': ', storedPosition)
-
   local roundedX = round(storedPosition.x, 4)
   local roundedY = round(storedPosition.y, 4)
   local roundedZ = round(storedPosition.z, 4)
@@ -61,8 +57,6 @@ local function SaveCharacterData(characterObject)
   )
 
   if success > 0 then
-    ambitionsPrint.debug('Character data saved for ID: ', uniqueId)
-
     return true
   else
     ambitionsPrint.error('Failed to save character data for ID: ', uniqueId)
@@ -95,8 +89,6 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
       z = pedPositions.z,
       heading = pedHeading
     }
-
-    ambitionsPrint.debug('Updated cache position for ', CHARACTER_OBJECT:getUniqueId(), ': ', CHARACTER_OBJECT.position)
   else
     ambitionsPrint.warning('Could not get live position for player: ', sessionId, ' - using stored position')
   end
@@ -104,8 +96,6 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
   CHARACTER_OBJECT:updatePlaytime()
 
   playerObject:updateLastSeen()
-
-  ambitionsPrint.debug('Cache updated successfully for player: ', sessionId)
 
   return true
 end
@@ -128,8 +118,6 @@ local function SavePlayerDropped(sessionId, playerObject)
 
     return
   end
-
-  ambitionsPrint.info('Saving player ', GetPlayerName(sessionId), ' before disconnect')
 
   local cacheUpdated = UpdateCacheBeforeSave(sessionId, playerObject)
 
