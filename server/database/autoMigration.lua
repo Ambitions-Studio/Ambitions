@@ -2,28 +2,6 @@ local ambitionsPrint = require('shared.lib.log.print')
 local migration = require('server.database.migration')
 local CONFIG = require('config.migration')
 
---- Initialize auto-migration system
---- This function is called when the resource starts
-local function Initialize()
-  if not CONFIG.enabled then
-    ambitionsPrint.warning('Auto-migration is disabled in configuration')
-
-    return
-  end
-
-  if not CONFIG.runOnStart then
-    ambitionsPrint.info('Auto-migration on start is disabled')
-
-    return
-  end
-
-  ambitionsPrint.info('Initializing auto-migration system...')
-
-  SetTimeout(1000, function()
-    RunAutoMigration()
-  end)
-end
-
 --- Run the auto-migration process
 --- This is the main function that handles the migration
 local function RunAutoMigration()
@@ -50,6 +28,28 @@ local function RunAutoMigration()
   end
 
   ambitionsPrint.info('=====================================')
+end
+
+--- Initialize auto-migration system
+--- This function is called when the resource starts
+local function Initialize()
+  if not CONFIG.enabled then
+    ambitionsPrint.warning('Auto-migration is disabled in configuration')
+
+    return
+  end
+
+  if not CONFIG.runOnStart then
+    ambitionsPrint.info('Auto-migration on start is disabled')
+
+    return
+  end
+
+  ambitionsPrint.info('Initializing auto-migration system...')
+
+  SetTimeout(1000, function()
+    RunAutoMigration()
+  end)
 end
 
 --- Manual migration trigger (for admin commands or debugging)
