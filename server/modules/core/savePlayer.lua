@@ -22,9 +22,11 @@ local function SaveUserData(license, userObject)
 
   if success > 0 then
     ambitionsPrint.debug('User data saved for license: ', license)
+
     return true
   else
     ambitionsPrint.error('Failed to save user data for license: ', license)
+
     return false
   end
 end
@@ -35,6 +37,7 @@ end
 local function SaveCharacterData(characterObject)
   if not characterObject then
     ambitionsPrint.error('Invalid character object for SaveCharacterData')
+
     return false
   end
 
@@ -59,9 +62,11 @@ local function SaveCharacterData(characterObject)
 
   if success > 0 then
     ambitionsPrint.debug('Character data saved for ID: ', uniqueId)
+
     return true
   else
     ambitionsPrint.error('Failed to save character data for ID: ', uniqueId)
+
     return false
   end
 end
@@ -75,6 +80,7 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
 
   if not CHARACTER_OBJECT then
     ambitionsPrint.error('No character object to update cache for player: ', sessionId)
+
     return false
   end
 
@@ -100,6 +106,7 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
   playerObject:updateLastSeen()
 
   ambitionsPrint.debug('Cache updated successfully for player: ', sessionId)
+
   return true
 end
 
@@ -112,17 +119,20 @@ local function SavePlayerDropped(sessionId, playerObject)
 
   if not CHARACTER_OBJECT then
     ambitionsPrint.error('Player ', GetPlayerName(sessionId), ' did not have a character object and therefore could not be saved.')
+
     return
   end
 
   if not PLAYER_LICENSE then
     ambitionsPrint.error('Player ', GetPlayerName(sessionId), ' did not have a license and therefore could not be saved.')
+
     return
   end
 
   ambitionsPrint.info('Saving player ', GetPlayerName(sessionId), ' before disconnect')
 
   local cacheUpdated = UpdateCacheBeforeSave(sessionId, playerObject)
+
   if not cacheUpdated then
     ambitionsPrint.warning('Cache update failed for player: ', sessionId, ' - proceeding with stored data')
   end

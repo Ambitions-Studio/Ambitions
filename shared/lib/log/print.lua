@@ -16,6 +16,7 @@ local function serialize(value, level, seen)
     seen = seen or {}
     local valueType = type(value)
     local spacing = string.rep('  ', level)
+
     if valueType == 'string' then
         return value
     elseif valueType == 'number' or valueType == 'boolean' then
@@ -24,17 +25,22 @@ local function serialize(value, level, seen)
         if seen[value] then
             return '<circular reference>'
         end
+
         seen[value] = true
         local out = '{\n'
+
         for k, v in pairs(value) do
             local keyStr = serialize(k, 0, seen)
             local valStr = serialize(v, level + 1, seen)
             out = out .. spacing .. '  [' .. keyStr .. '] = ' .. valStr .. ',\n'
         end
+
         if out:sub(-2) == ',\n' then
             out = out:sub(1, -3) .. '\n'
         end
+
         out = out .. spacing .. '}'
+
         return out
     elseif valueType == 'function' then
         return '<function: ' .. tostring(value) .. '>'
@@ -51,10 +57,13 @@ end
 local function print_log(level, ...)
     local args = { ... }
     local out = {}
+
     for i = 1, #args do
         out[#out+1] = serialize(args[i], 0)
     end
+
     local lvl = LOG_LEVELS[level] or LOG_LEVELS.info
+
     print(("%s[%s]^7: %s"):format(lvl.color, lvl.label, table.concat(out, ' ')))
 end
 

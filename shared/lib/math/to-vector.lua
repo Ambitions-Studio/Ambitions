@@ -6,6 +6,7 @@
 ---@return number processed The processed value
 local function processNumber(value, min, max, round)
   local num = tonumber(value)
+
   if not num then
     error(("Invalid value '%s' cannot be converted to a number"):format(tostring(value)), 2)
   end
@@ -16,6 +17,7 @@ local function processNumber(value, min, max, round)
   if round then
     if type(round) == "number" then
       local power = 10 ^ round
+
       num = math.floor(num * power + 0.5) / power
     else
       num = math.floor(num + 0.5)
@@ -33,9 +35,11 @@ end
 ---@return number[] processed Array of processed numbers
 local function processNumberArray(numbers, min, max, round)
   local processed = {}
+
   for i, value in ipairs(numbers) do
     processed[i] = processNumber(value, min, max, round)
   end
+
   return processed
 end
 
@@ -79,6 +83,7 @@ function ambitionsToVector.convert(input, min, max, round)
     end
 
     local processed = processNumberArray(scalars, min, max, round)
+
     return createVector(processed)
 
   elseif inputType == "table" then
@@ -90,7 +95,7 @@ function ambitionsToVector.convert(input, min, max, round)
       end
     else
       if input.x then components[1] = input.x end
-      if input.y then components[2] = input.y end  
+      if input.y then components[2] = input.y end
       if input.z then components[3] = input.z end
       if input.w then components[4] = input.w end
     end
@@ -100,6 +105,7 @@ function ambitionsToVector.convert(input, min, max, round)
     end
 
     local processed = processNumberArray(components, min, max, round)
+
     return createVector(processed)
 
   else

@@ -34,6 +34,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@param ... any Additional arguments to pass to the event
   function self:triggerEvent(eventName, ...)
     assert(type(eventName) == 'string', 'eventName must be a string')
+
     TriggerClientEvent(eventName, self.sessionId, self, ...)
   end
 
@@ -107,6 +108,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
       local sessionTime = GetPlayerTimeOnline(self.sessionId) / 1000
       return self.playtime + sessionTime
     end
+
     return self.playtime
   end
 
@@ -120,6 +122,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
     SetEntityHeading(player, position.w or position.heading or 0.0)
 
     self.position = position
+
     return self
   end
 
@@ -135,6 +138,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
     if status then
       self:updateLastPlayed()
     end
+
     return self
   end
 
@@ -143,6 +147,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@return AmbitionsCharacterObject self For method chaining
   function self:setPedModel(model)
     self.pedModel = model
+
     return self
   end
 
@@ -151,6 +156,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@return AmbitionsCharacterObject self For method chaining
   function self:setGroup(group)
     self.group = group
+
     return self
   end
 
@@ -158,6 +164,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@return AmbitionsCharacterObject self For method chaining
   function self:updateLastPlayed()
     self.lastPlayed = os.time()
+
     return self
   end
 
@@ -168,6 +175,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
       local sessionTime = GetPlayerTimeOnline(self.sessionId) / 1000
       self.playtime = self.playtime + sessionTime
     end
+
     return self
   end
 
@@ -181,6 +189,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
     -- TODO: Implement database save logic
     ambitionsPrint.debug("Saving character data for ID: ", self.uniqueId)
     self:updateLastPlayed()
+
     return true
   end
 

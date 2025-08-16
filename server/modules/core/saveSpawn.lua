@@ -10,7 +10,6 @@ local playerCache = require('server.lib.cache.player')
 ---@param uniqueId string The unique id to check
 ---@return boolean isInUse True if the unique id is in use, false otherwise
 local function isUniqueIdInUse(uniqueId)
-
   local count = MySQL.scalar.await('SELECT COUNT(*) FROM characters WHERE unique_id = ?', { uniqueId })
 
   return count > 0
@@ -22,6 +21,7 @@ end
 local function GetValidUniqueId(sessionId)
   local uniqueId
   local maxAttempts = 10
+
   for _ = 1, maxAttempts do
     uniqueId = random.alphanumeric(6)
     if not isUniqueIdInUse(uniqueId) then
@@ -30,6 +30,7 @@ local function GetValidUniqueId(sessionId)
   end
 
   ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId, ' after ', maxAttempts, ' attempts')
+
   return nil
 end
 
@@ -53,12 +54,14 @@ local function CreateCharacter(sessionId, userId, ambitionsUser)
   if not characterData.uniqueId then
     ambitionsPrint.error('Failed to generate a valid unique id for player: ', sessionId)
     DropPlayer(sessionId, 'Failed to generate a valid unique id, please contact an administrator.')
+
     return
   end
 
   MySQL.insert.await('INSERT INTO characters (user_id, unique_id, `group`, ped_model, position_x, position_y, position_z, heading) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', { userId, characterData.uniqueId, characterData.group, characterData.pedModel, characterData.position.x, characterData.position.y, characterData.position.z, characterData.position.heading })
 
   local ambitionsCharacter = characterObject(sessionId, characterData.uniqueId, characterData)
+
   ambitionsUser:addCharacter(ambitionsCharacter)
   ambitionsUser:setCurrentCharacter(characterData.uniqueId)
   ambitionsUser:getCurrentCharacter():setActive(true)
@@ -83,17 +86,21 @@ local function CreateUser(sessionId, identifiers)
   if not PLAYER_LICENSE or not PLAYER_IP or not PLAYER_DISCORD_ID then
     ambitionsPrint.error('failed to get mandatory identifiers for player: ', sessionId)
     DropPlayer(sessionId, 'Failed to get your identifiers, please contact an administrator.')
+
     return
   end
 
   local userId = MySQL.insert.await('INSERT INTO users (license, discord_id, ip) VALUES (?, ?, ?)', { PLAYER_LICENSE, PLAYER_DISCORD_ID, PLAYER_IP })
+
   if not userId then
     ambitionsPrint.error('Failed to create user with license: ', PLAYER_LICENSE)
     DropPlayer(sessionId, 'Failed to create your user, please contact an administrator.')
+
     return
   end
 
   local ambitionsUser = userObject(sessionId, PLAYER_LICENSE)
+
   ambitionsUser:setIdentifiers(identifiers)
 
   CreateCharacter(sessionId, userId, ambitionsUser)
@@ -104,9 +111,10 @@ end
 ---@return table | nil characterData The character data or nil if not found
 local function LoadUserCharacter(userId)
   local characterData = MySQL.single.await('SELECT * FROM characters WHERE user_id = ? LIMIT 1', { userId })
-  
+
   if not characterData then
     ambitionsPrint.warning('No character found for user ID: ', userId)
+
     return nil
   end
 
@@ -134,9 +142,11 @@ end
 ---@return AmbitionsUserObject ambitionsUser The created user object
 local function CreateUserObjects(sessionId, playerLicense, playerIdentifiers, characterData)
   local ambitionsUser = userObject(sessionId, playerLicense)
+
   ambitionsUser:setIdentifiers(playerIdentifiers)
 
   local ambitionsCharacter = characterObject(sessionId, characterData.uniqueId, characterData)
+
   ambitionsUser:addCharacter(ambitionsCharacter)
   ambitionsUser:setCurrentCharacter(characterData.uniqueId)
   ambitionsUser:getCurrentCharacter():setActive(true)
@@ -169,10 +179,12 @@ local function RetrieveUserData(sessionId, userId, playerIdentifiers)
   if not characterData then
     ambitionsPrint.info('No character found for user, creating new character')
     DropPlayer(sessionId, 'Failed to retrieve your character, please contact an administrator.')
+
     return
   end
 
   local ambitionsUser = CreateUserObjects(sessionId, playerIdentifiers.license, playerIdentifiers, characterData)
+
   FinalizeUserSpawn(sessionId, ambitionsUser)
 end
 
@@ -185,6 +197,7 @@ local function CheckFirstSpawn()
   if not PLAYER_LICENSE then
     ambitionsPrint.error('Failed to get player license for session id : ', SESSION_ID)
     DropPlayer(SESSION_ID, 'Failed to get your FiveM license, please contact an administrator.')
+
     return
   end
 

@@ -16,6 +16,7 @@ function playerCache.add(sessionId, userObject)
 
   cache[sessionId] = userObject
   ambitionsPrint.debug('Player added to cache: ', sessionId)
+
   return true
 end
 
@@ -33,9 +34,12 @@ function playerCache.remove(sessionId)
   if cache[sessionId] then
     cache[sessionId] = nil
     ambitionsPrint.debug('Player removed from cache: ', sessionId)
+
     return true
   end
+
   ambitionsPrint.warning('Attempted to remove non-existent player from cache: ', sessionId)
+
   return false
 end
 
@@ -56,9 +60,11 @@ end
 ---@return number count Number of players currently cached
 function playerCache.getCount()
   local count = 0
+
   for _ in pairs(cache) do
     count = count + 1
   end
+
   return count
 end
 
@@ -66,9 +72,11 @@ end
 ---@return table sessionIds Array of all cached session IDs
 function playerCache.getAllSessionIds()
   local sessionIds = {}
+
   for sessionId, _ in pairs(cache) do
     table.insert(sessionIds, sessionId)
   end
+
   return sessionIds
 end
 

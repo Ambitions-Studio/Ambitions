@@ -75,9 +75,11 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@return number count Number of characters this user has
   function self:getCharacterCount()
     local count = 0
+
     for _ in pairs(self.characters) do
       count = count + 1
     end
+
     return count
   end
 
@@ -108,7 +110,9 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
         total = total + character:getPlaytime()
       end
     end
+
     self.totalPlaytime = total
+
     return total
   end
 
@@ -117,6 +121,7 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@return AmbitionsUserObject self For method chaining
   function self:setIdentifiers(identifiers)
     self.identifiers = identifiers or {}
+
     return self
   end
 
@@ -130,6 +135,7 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
 
     self.currentCharacter = self.characters[uniqueId]
     self.lastPlayedCharacter = uniqueId
+
     return true
   end
 
@@ -138,9 +144,11 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@return AmbitionsUserObject self For method chaining
   function self:setOnlineStatus(status)
     self.isOnline = status
+
     if not status then
       self:updateLastSeen()
     end
+
     return self
   end
 
@@ -154,12 +162,14 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
     end
 
     local uniqueId = characterObject:getUniqueId()
+
     if self.characters[uniqueId] then
       ambitionsPrint.error("Character with ID " .. uniqueId .. " already exists")
       return false
     end
 
     self.characters[uniqueId] = characterObject
+
     return true
   end
 
@@ -177,6 +187,7 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
     end
 
     self.characters[uniqueId] = nil
+
     return true
   end
 
@@ -184,6 +195,7 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@return AmbitionsUserObject self For method chaining
   function self:updateLastSeen()
     self.lastSeen = os.time()
+
     return self
   end
 
@@ -196,6 +208,7 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
       DropPlayer(self.sessionId, reason)
       self.isOnline = false
     end
+
     return self
   end
 

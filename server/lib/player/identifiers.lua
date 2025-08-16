@@ -3,6 +3,7 @@
 ---@return table identifiers Table containing all player identifiers with only the values (no prefixes)
 local function getAllIdentifiers(playerId)
     local rawIdentifiers = GetPlayerIdentifiers(playerId)
+
     if not rawIdentifiers then
         return {}
     end
@@ -12,7 +13,7 @@ local function getAllIdentifiers(playerId)
     for i = 1, #rawIdentifiers do
         local identifier = rawIdentifiers[i]
         local identifierType, identifierValue = identifier:match("^([^:]+):(.+)$")
-        
+
         if identifierType and identifierValue then
             identifiers[identifierType] = identifierValue
         end
@@ -27,6 +28,7 @@ end
 ---@return boolean hasIdentifier Whether the player has this identifier type
 local function hasIdentifier(playerId, identifierType)
     local identifier = GetPlayerIdentifierByType(playerId, identifierType)
+
     return identifier ~= nil and identifier ~= ""
 end
 
@@ -53,18 +55,18 @@ function identifiers.get(playerId)
 
     setmetatable(obj, {
         __index = function(_, key)
-            -- Si c'est une fonction définie, la retourner
             if rawget(obj, key) then
                 return rawget(obj, key)
             end
 
-            -- Sinon, récupérer l'identifiant du type demandé et extraire la valeur
             local fullIdentifier = GetPlayerIdentifierByType(playerId, key)
+
             if not fullIdentifier then
                 return nil
             end
-            
+
             local _, identifierValue = fullIdentifier:match("^([^:]+):(.+)$")
+
             return identifierValue or fullIdentifier
         end
     })
