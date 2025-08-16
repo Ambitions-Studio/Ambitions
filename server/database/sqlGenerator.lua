@@ -19,6 +19,11 @@ local function GenerateColumnDefinition(columnName, columnConfig)
     definition = definition .. " NOT NULL"
   end
 
+  -- Add PRIMARY KEY before AUTO_INCREMENT (SQL requirement)
+  if columnConfig.primaryKey then
+    definition = definition .. " PRIMARY KEY"
+  end
+
   if columnConfig.autoIncrement then
     definition = definition .. " AUTO_INCREMENT"
   end
@@ -37,10 +42,6 @@ local function GenerateColumnDefinition(columnName, columnConfig)
 
   if columnConfig.onUpdate then
     definition = definition .. " ON UPDATE " .. columnConfig.onUpdate
-  end
-
-  if columnConfig.primaryKey then
-    definition = definition .. " PRIMARY KEY"
   end
 
   if columnConfig.comment then
