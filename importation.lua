@@ -3,17 +3,21 @@ local CURRENT_RESOURCE = GetCurrentResourceName()
 local MODULE_CACHE = {}
 
 --- Parse module name to extract resource and path components
----@param name string The module name to parse (e.g., "@resource.module" or "module")
+---@param name string The module name to parse (e.g., "ResourceName.module" or "module")
 ---@return string resource The resource name
 ---@return string path The module path with dots converted to slashes
 local function parseModule(name)
-    if name:sub(1, 1) == "@" then
-        local resource, path = name:match("^@([^%.]+)%.(.+)$")
-        if not resource or not path then
-            error(("Invalid module format: '%s'"):format(name), 3)
+    local dotIndex = name:find("%.")
+
+    if dotIndex then
+        local potentialResource = name:sub(1, dotIndex - 1)
+        local potentialPath = name:sub(dotIndex + 1)
+
+        if potentialResource ~= CURRENT_RESOURCE and GetResourceState(potentialResource) ~= "missing" then
+            return potentialResource, potentialPath:gsub("%.", "/")
         end
-        return resource, path:gsub("%.", "/")
     end
+
     return CURRENT_RESOURCE, name:gsub("%.", "/")
 end
 
