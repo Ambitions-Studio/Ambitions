@@ -15,7 +15,8 @@ local function parseModule(name)
     local resource = name:sub(1, dotIndex - 1)
     local path = name:sub(dotIndex + 1)
 
-    if GetResourceState(resource) ~= "started" then
+    local resourceState = GetResourceState(resource)
+    if resourceState ~= "starting" and resourceState ~= "started" then
         error(("Resource '%s' is not started or does not exist"):format(resource), 3)
     end
 
