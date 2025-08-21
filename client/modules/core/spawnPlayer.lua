@@ -1,4 +1,4 @@
-local multicharacterConfig = require('config.multicharacter')
+local multicharacterConfig = require('Ambitions.config.multicharacter')
 
 --- Set the default clothes for the player
 ---@param ped number The ped of the player
