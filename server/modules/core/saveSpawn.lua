@@ -1,10 +1,10 @@
-local ambitionsPrint = require('shared.lib.log.print')
-local identifiers = require('server.lib.player.identifiers')
-local random = require('shared.lib.math.random')
-local spawnConfig = require('config.multicharacter')
-local userObject = require('server.classes.userObject')
-local characterObject = require('server.classes.characterObject')
-local playerCache = require('server.lib.cache.player')
+local ambitionsPrint = require('Ambitions.shared.lib.log.print')
+local identifiers = require('Ambitions.server.lib.player.identifiers')
+local random = require('Ambitions.shared.lib.math.random')
+local spawnConfig = require('Ambitions.config.multicharacter')
+local userObject = require('Ambitions.server.classes.userObject')
+local characterObject = require('Ambitions.server.classes.characterObject')
+local playerCache = require('Ambitions.server.lib.cache.player')
 
 --- Check if the unique id is already in use by a character
 ---@param uniqueId string The unique id to check

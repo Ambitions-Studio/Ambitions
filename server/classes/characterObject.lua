@@ -1,4 +1,4 @@
-local spawnConfig = require('config.multicharacter')
+local spawnConfig = require('Ambitions.config.multicharacter')
 
 --- Modern Character Object Class to handle the character data
 ---@param sessionId number The session id of the player

@@ -1,4 +1,4 @@
-local ambitionsPrint = require('shared.lib.log.print')
+local ambitionsPrint = require('Ambitions.shared.lib.log.print')
 
 --- Generate SQL column definition from schema column config
 ---@param columnName string The name of the column

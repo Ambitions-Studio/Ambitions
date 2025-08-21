@@ -1,6 +1,6 @@
-local ambitionsPrint = require('shared.lib.log.print')
-local schema = require('server.database.schema')
-local sqlGenerator = require('server.database.sqlGenerator')
+local ambitionsPrint = require('Ambitions.shared.lib.log.print')
+local schema = require('Ambitions.server.database.schema')
+local sqlGenerator = require('Ambitions.server.database.sqlGenerator')
 
 --- Check if a table exists in the database
 ---@param tableName string The name of the table to check

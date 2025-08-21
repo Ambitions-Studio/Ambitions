@@ -1,6 +1,6 @@
-local ambitionsPrint = require('shared.lib.log.print')
-local migration = require('server.database.migration')
-local CONFIG = require('config.migration')
+local ambitionsPrint = require('Ambitions.shared.lib.log.print')
+local migration = require('Ambitions.server.database.migration')
+local CONFIG = require('Ambitions.config.migration')
 
 --- Run the auto-migration process
 --- This is the main function that handles the migration
@@ -63,7 +63,7 @@ end
 ---@return table status Migration status with details
 local function GetMigrationStatus()
   local appliedMigrations = migration.GetAppliedMigrations()
-  local schema = require('server.database.schema')
+  local schema = require('Ambitions.server.database.schema')
 
   return {
     enabled = CONFIG.enabled,
