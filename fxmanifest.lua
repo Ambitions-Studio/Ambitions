@@ -8,7 +8,7 @@ author 'Ambitions Studio'
 
 description 'Ambitions — A modern, scalable, and secure FiveM framework built with Lua 5.4 standards. Designed for performance, modularity, and full open-source collaboration.'
 
-version '0.0.0'
+version '0.5.0'
 
 name 'Ambitions'
 
