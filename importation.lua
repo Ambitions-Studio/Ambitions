@@ -1,24 +1,25 @@
 local SEARCH_PATTERNS = { "?.lua", "?/init.lua" }
-local CURRENT_RESOURCE = GetCurrentResourceName()
 local MODULE_CACHE = {}
 
 --- Parse module name to extract resource and path components
----@param name string The module name to parse (e.g., "ResourceName.module" or "module")
+---@param name string The module name to parse (e.g., "ResourceName.module.path")
 ---@return string resource The resource name
 ---@return string path The module path with dots converted to slashes
 local function parseModule(name)
     local dotIndex = name:find("%.")
 
-    if dotIndex then
-        local potentialResource = name:sub(1, dotIndex - 1)
-        local potentialPath = name:sub(dotIndex + 1)
-
-        if potentialResource ~= CURRENT_RESOURCE and GetResourceState(potentialResource) ~= "missing" then
-            return potentialResource, potentialPath:gsub("%.", "/")
-        end
+    if not dotIndex then
+        error(("Invalid module format: '%s'. Must use 'ResourceName.module.path' format"):format(name), 3)
     end
 
-    return CURRENT_RESOURCE, name:gsub("%.", "/")
+    local resource = name:sub(1, dotIndex - 1)
+    local path = name:sub(dotIndex + 1)
+
+    if GetResourceState(resource) ~= "started" then
+        error(("Resource '%s' is not started or does not exist"):format(resource), 3)
+    end
+
+    return resource, path:gsub("%.", "/")
 end
 
 --- Load and execute a Lua file from a resource
