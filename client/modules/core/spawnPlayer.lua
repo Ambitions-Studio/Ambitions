@@ -1,3 +1,5 @@
+local multicharacterConfig = require('config.multicharacter')
+
 --- Set the default clothes for the player
 ---@param ped number The ped of the player
 local function SetDefaultClothes(ped)
@@ -53,9 +55,12 @@ RegisterNetEvent('ambitions:client:playerLoaded', function(pedModel, spawnCoords
 end)
 
 CreateThread(function()
-  while not NetworkIsPlayerActive(PlayerId()) do
+  while not multicharacterConfig.useMulticharacter do
     Wait(100)
-  end
 
-  TriggerServerEvent('ambitions:server:checkFirstSpawn')
+    if NetworkIsPlayerActive(PlayerId()) then
+      TriggerServerEvent('ambitions:server:checkFirstSpawn')
+      break
+    end
+  end
 end)
