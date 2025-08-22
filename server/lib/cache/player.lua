@@ -1,4 +1,4 @@
-local ambitionsPrint = require('Ambitions.shared.lib.log.print')
+local ambitionsPrint = require('shared.lib.log.print')
 
 local cache = {}
 

@@ -1,6 +1,6 @@
-local ambitionsPrint = require('Ambitions.shared.lib.log.print')
-local playerCache = require('Ambitions.server.lib.cache.player')
-local round = require('Ambitions.shared.lib.math.round')
+local ambitionsPrint = require('shared.lib.log.print')
+local playerCache = require('server.lib.cache.player')
+local round = require('shared.lib.math.round')
 
 --- Save user data to database
 ---@param license string The player's license

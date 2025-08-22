@@ -1,4 +1,4 @@
-local ambitionsPrint = require('Ambitions.shared.lib.log.print')
+local ambitionsPrint = require('shared.lib.log.print')
 
 --- Modern User Object Class to handle the user data
 ---@param sessionId number The session id of the player

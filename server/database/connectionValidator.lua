@@ -1,4 +1,4 @@
-local ambitionsPrint = require('Ambitions.shared.lib.log.print')
+local ambitionsPrint = require('shared.lib.log.print')
 
 --- Validate URL format: mysql://user:password@host:port/database
 ---@param connectionString string The connection string to validate
