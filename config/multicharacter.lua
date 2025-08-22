@@ -30,11 +30,11 @@ return {
   ---          NO identity system or character creation included
   ---
   --- USAGE EXAMPLES:
-  --- - GetResourceState('Ambitions-Multicharacter') == 'started'  (auto-detect Ambitions Studio)
-  --- - GetResourceState('your-identity') == 'started'             (auto-detect your resource)
+  --- - GetResourceState('Ambitions-Multicharacter') ~= 'missing'  (auto-detect Ambitions Studio - includes 'starting' and 'started')
+  --- - GetResourceState('your-identity') ~= 'missing'             (auto-detect your resource - includes 'starting' and 'started')
   --- - true                                                       (always delegate)
   --- - false                                                      (framework handles spawn)
-  useMulticharacter = GetResourceState('Ambitions-Multicharacter') == 'started',
+  useMulticharacter = GetResourceState('Ambitions-Multicharacter') ~= 'missing',
 
   -- ===================================================================
   -- SPAWN PARAMETERS (useMulticharacter = false only)
