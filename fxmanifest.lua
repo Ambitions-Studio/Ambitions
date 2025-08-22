@@ -32,7 +32,8 @@ client_scripts {
 files {
     'verification.lua',
     'importation.lua',
-    'client/**/*.lua'
+    'client/**/*.lua',
+    'config/*.lua'
 }
 
 dependencies {
