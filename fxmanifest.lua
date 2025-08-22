@@ -21,6 +21,8 @@ server_scripts {
 
     'server/init.lua',
     'server/database/autoMigration.lua',
+    'server/modules/core/savePlayer.lua',
+    'server/modules/core/saveSpawn.lua',
 }
 
 client_scripts {
@@ -30,6 +32,7 @@ client_scripts {
 files {
     'verification.lua',
     'importation.lua',
+    'client/**/*.lua'
 }
 
 dependencies {
