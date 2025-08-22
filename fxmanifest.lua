@@ -33,6 +33,7 @@ files {
     'verification.lua',
     'importation.lua',
     'client/**/*.lua',
+    'shared/**/*.lua',
     'config/*.lua'
 }
 
