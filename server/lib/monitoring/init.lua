@@ -1,5 +1,5 @@
-local log = require("@shared.lib.log.print")
-local monitoringConfig = require("@config.monitoring")
+local log = require("shared.lib.log.print")
+local monitoringConfig = require("config.monitoring")
 
 if not monitoringConfig.enabled then
     return {
