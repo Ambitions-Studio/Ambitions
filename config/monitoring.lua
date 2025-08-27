@@ -26,7 +26,7 @@ return {
   },
 
   grafanaOss = {
-    baseUrl = GetConvar("grafana_oss_base_url", "http://localhost:3000"),
+    baseUrl = GetConvar("grafana_oss_base_url", ""),
     authMethod = "service_account", --- basic or service_account
 
     username = GetConvar("grafana_oss_username", "admin"),
@@ -35,9 +35,9 @@ return {
     serviceAccountToken = GetConvar("grafana_oss_service_token", ""),
 
     endpoints = {
-      loki = "http://localhost:3100/loki/api/v1/push",
-      prometheus = "http://localhost:9090/api/v1/push",
-      tempo = "http://localhost:3200/api/push"
+      loki = "http://141.94.99.154:3100/loki/api/v1/push",
+      prometheus = "http://141.94.99.154:9091/metrics/job/fivem-server",
+      tempo = "http://141.94.99.154:3200/v1/traces"
     }
   },
 
@@ -54,9 +54,9 @@ return {
   },
 
   debug = {
-    enabled = false,
+    enabled = true,
     logPerformance = false,
     validateData = false,
-    printQueueStats = false
+    printQueueStats = true
   }
 }

@@ -28,12 +28,16 @@ local function base64Encode(input)
     local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
     return ((input:gsub('.', function(x)
         local r, bIndex = '', x:byte()
-        for i = 8, 1, -1 do r = r .. (bIndex % 2 ^ i - bIndex % 2 ^ (i - 1) > 0 and '1' or '0') end
+        for i = 8, 1, -1 do 
+            r = r .. (bIndex % 2 ^ i - bIndex % 2 ^ (i - 1) > 0 and '1' or '0') 
+        end
         return r
     end) .. '0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
         if #x < 6 then return '' end
         local c = 0
-        for i = 1, 6 do c = c + (x:sub(i, i) == '1' and 2 ^ (6 - i) or 0) end
+        for i = 1, 6 do 
+            c = c + (x:sub(i, i) == '1' and 2 ^ (6 - i) or 0) 
+        end
         return b:sub(c + 1, c + 1)
     end) .. ({ '', '==', '=' })[#input % 3 + 1])
 end
@@ -45,7 +49,7 @@ local function generateTraceId()
 end
 
 --- Generate unique span ID for tracing spans
----@return string spanId Unique span identifier  
+---@return string spanId Unique span identifier
 local function generateSpanId()
     return string.format("%016x", math.random(0, 2^32-1))
 end
@@ -71,11 +75,8 @@ local function sanitizeData(data)
             end
         end
 
-        if shouldRedact then
-            sanitized[k] = monitoringConfig.security.redactionPlaceholder
-        else
-            sanitized[k] = type(v) == "table" and sanitizeData(v) or v
-        end
+        sanitized[k] = shouldRedact and monitoringConfig.security.redactionPlaceholder 
+                      or (type(v) == "table" and sanitizeData(v) or v)
     end
 
     return sanitized
@@ -131,15 +132,16 @@ local function flushLogQueue()
     logQueue = {}
 end
 
---- Flush metric queue to Grafana Prometheus  
+--- Flush metric queue to Grafana Prometheus
 local function flushMetricQueue()
     if #metricQueue == 0 or not monitoringConfig.metricsEnabled then return end
 
     local auth = getAuthHeader()
-    local metricsText = table.concat(metricQueue, "\n")
-
+    local metricsText = table.concat(metricQueue, "\n") .. "\n"
+    
     if monitoringConfig.debug.enabled then
         log.debug(("[Ambitions:Monitoring] Sending %d metrics to %s"):format(#metricQueue, currentConfig.endpoints.prometheus))
+        log.debug(("[Ambitions:Monitoring] Metrics payload: %s"):format(metricsText:sub(1, 200)))
     end
 
     PerformHttpRequest(currentConfig.endpoints.prometheus, function(code, _, _)
@@ -148,8 +150,7 @@ local function flushMetricQueue()
         elseif monitoringConfig.debug.enabled then
             log.debug(("[Ambitions:Monitoring] Successfully sent %d metrics"):format(#metricQueue))
         end
-    end, "POST", metricsText, {
-        ["Authorization"] = auth,
+    end, "PUT", metricsText, {
         ["Content-Type"] = "text/plain"
     })
 
@@ -195,17 +196,13 @@ CreateThread(function()
         flushAllQueues()
 
         if monitoringConfig.debug.printQueueStats then
-            local stats = {
-                logs = #logQueue,
-                metrics = #metricQueue,
-                traces = #traceQueue,
-                activeTraces = 0
-            }
+            local activeTraceCount = 0
             for _ in pairs(activeTraces) do
-                stats.activeTraces = stats.activeTraces + 1
+                activeTraceCount = activeTraceCount + 1
             end
 
-            log.info(("[Ambitions:Monitoring] Queue Stats - Logs: %d, Metrics: %d, Traces: %d, Active: %d"):format(stats.logs, stats.metrics, stats.traces, stats.activeTraces))
+            log.info(("[Ambitions:Monitoring] Queue Stats - Logs: %d, Metrics: %d, Traces: %d, Active: %d")
+                :format(#logQueue, #metricQueue, #traceQueue, activeTraceCount))
         end
     end
 end)
@@ -224,12 +221,9 @@ function monitoring.Logs.Send(message, level, component, labels, metadata)
     if not monitoringConfig.logsEnabled then return end
 
     local validLevels = {debug=true, info=true, warn=true, error=true, fatal=true}
+    level = validLevels[level] and level or "info"
 
-    if not validLevels[level] then
-        level = "info"
-    end
-
-    local timestamp = tostring(math.floor(GetGameTimer() * 1000000))
+    local timestamp = tostring(os.time() * 1000000000)
 
     local stream = {
         job = "fivem-ambitions",
@@ -252,7 +246,6 @@ function monitoring.Logs.Send(message, level, component, labels, metadata)
 
     local logData = {
         message = message,
-        timestamp = timestamp,
         metadata = metadata and sanitizeData(metadata) or nil
     }
 
@@ -324,34 +317,30 @@ function monitoring.Metrics.Counter(name, value, labels, help)
     if not monitoringConfig.metricsEnabled then return end
 
     local allLabels = {}
-
     for k, v in pairs(monitoringConfig.globalLabels) do
         allLabels[k] = v
     end
 
     if labels then
         local sanitizedLabels = sanitizeData(labels)
-
         for k, v in pairs(sanitizedLabels) do
             allLabels[k] = v
         end
     end
 
     local labelString = ""
-
     if next(allLabels) then
         local labelPairs = {}
-
         for k, v in pairs(allLabels) do
-            table.insert(labelPairs, string.format('%s="%s"', k, tostring(v)))
+            local cleanValue = tostring(v):gsub(' ', '_'):gsub('"', '\\"')
+            table.insert(labelPairs, string.format('%s="%s"', k, cleanValue))
         end
-
         labelString = "{" .. table.concat(labelPairs, ",") .. "}"
     end
 
     local metricLine = string.format("# HELP %s %s", name, help or "Counter metric")
     local typeLine = string.format("# TYPE %s counter", name)
-    local valueLine = string.format("%s%s %s %d", name, labelString, tostring(value), GetGameTimer())
+    local valueLine = string.format("%s%s %s", name, labelString, tostring(value))
 
     table.insert(metricQueue, metricLine)
     table.insert(metricQueue, typeLine)  
@@ -371,34 +360,30 @@ function monitoring.Metrics.Gauge(name, value, labels, help)
     if not monitoringConfig.metricsEnabled then return end
 
     local allLabels = {}
-
     for k, v in pairs(monitoringConfig.globalLabels) do
         allLabels[k] = v
     end
 
     if labels then
         local sanitizedLabels = sanitizeData(labels)
-
         for k, v in pairs(sanitizedLabels) do
             allLabels[k] = v
         end
     end
 
     local labelString = ""
-
     if next(allLabels) then
         local labelPairs = {}
-
         for k, v in pairs(allLabels) do
-            table.insert(labelPairs, string.format('%s="%s"', k, tostring(v)))
+            local cleanValue = tostring(v):gsub(' ', '_'):gsub('"', '\\"')
+            table.insert(labelPairs, string.format('%s="%s"', k, cleanValue))
         end
-
         labelString = "{" .. table.concat(labelPairs, ",") .. "}"
     end
 
     local metricLine = string.format("# HELP %s %s", name, help or "Gauge metric")
     local typeLine = string.format("# TYPE %s gauge", name) 
-    local valueLine = string.format("%s%s %s %d", name, labelString, tostring(value), GetGameTimer())
+    local valueLine = string.format("%s%s %s", name, labelString, tostring(value))
 
     table.insert(metricQueue, metricLine)
     table.insert(metricQueue, typeLine)
@@ -419,32 +404,28 @@ function monitoring.Metrics.Histogram(name, value, buckets, labels, help)
     if not monitoringConfig.metricsEnabled then return end
 
     local allLabels = {}
-
     for k, v in pairs(monitoringConfig.globalLabels) do
         allLabels[k] = v
     end
 
     if labels then
         local sanitizedLabels = sanitizeData(labels)
-
         for k, v in pairs(sanitizedLabels) do
             allLabels[k] = v
         end
     end
 
     local labelString = ""
-
     if next(allLabels) then
         local labelPairs = {}
-
         for k, v in pairs(allLabels) do
-            table.insert(labelPairs, string.format('%s="%s"', k, tostring(v)))
+            local cleanValue = tostring(v):gsub(' ', '_'):gsub('"', '\\"')
+            table.insert(labelPairs, string.format('%s="%s"', k, cleanValue))
         end
-
         labelString = "{" .. table.concat(labelPairs, ",") .. "}"
     end
 
-    local timestamp = GetGameTimer()
+    local timestamp = os.time() * 1000
     local metricLine = string.format("# HELP %s %s", name, help or "Histogram metric")
     local typeLine = string.format("# TYPE %s histogram", name)
 
@@ -458,15 +439,15 @@ function monitoring.Metrics.Histogram(name, value, buckets, labels, help)
             count = count + 1
         end
 
-        local bucketLine = string.format('%s_bucket{le="%s"%s} %d %d', name, tostring(bucket), labelString:gsub("^{", ","):gsub("}$", "}") or "", count, timestamp)
+        local bucketLine = string.format('%s_bucket{le="%s"%s} %d', name, tostring(bucket), labelString:gsub("^{", ","):gsub("}$", "}") or "", count)
         table.insert(metricQueue, bucketLine)
     end
 
-    local infLine = string.format('%s_bucket{le="+Inf"%s} %d %d', name, labelString:gsub("^{", ","):gsub("}$", "}") or "", count, timestamp)
+    local infLine = string.format('%s_bucket{le="+Inf"%s} %d', name, labelString:gsub("^{", ","):gsub("}$", "}") or "", count)
     table.insert(metricQueue, infLine)
 
-    local countLine = string.format("%s_count%s %d %d", name, labelString, 1, timestamp)
-    local sumLine = string.format("%s_sum%s %s %d", name, labelString, tostring(value), timestamp)
+    local countLine = string.format("%s_count%s %d", name, labelString, 1)
+    local sumLine = string.format("%s_sum%s %s", name, labelString, tostring(value))
 
     table.insert(metricQueue, countLine)
     table.insert(metricQueue, sumLine)
@@ -494,18 +475,17 @@ function monitoring.Trace.StartSpan(operationName, parentSpanId, traceId, tags)
     local spanId = generateSpanId()
     local startTime = GetGameTimer() * 1000 -- Convert to microseconds
 
-    local spanTags = {}
+    local spanTags = {
+        {key = "server", value = monitoringConfig.serverName},
+        {key = "resource", value = GetInvokingResource() or GetCurrentResourceName()}
+    }
 
     for k, v in pairs(monitoringConfig.globalLabels) do
         table.insert(spanTags, {key = tostring(k), value = tostring(v)})
     end
 
-    table.insert(spanTags, {key = "server", value = monitoringConfig.serverName})
-    table.insert(spanTags, {key = "resource", value = GetInvokingResource() or GetCurrentResourceName()})
-
     if tags then
         local sanitizedTags = sanitizeData(tags)
-
         for k, v in pairs(sanitizedTags) do
             table.insert(spanTags, {key = tostring(k), value = tostring(v)})
         end
@@ -552,7 +532,6 @@ function monitoring.Trace.FinishSpan(spanId, tags)
 
     if tags then
         local sanitizedTags = sanitizeData(tags)
-
         for k, v in pairs(sanitizedTags) do
             table.insert(span.tags, {key = tostring(k), value = tostring(v)})
         end
@@ -584,7 +563,6 @@ function monitoring.Trace.LogToSpan(spanId, fields)
     }
 
     local sanitizedFields = sanitizeData(fields)
-
     for k, v in pairs(sanitizedFields) do
         table.insert(logEntry.fields, {key = tostring(k), value = tostring(v)})
     end
@@ -605,7 +583,6 @@ function monitoring.Trace.SetSpanTags(spanId, tags)
     end
 
     local sanitizedTags = sanitizeData(tags)
-
     for k, v in pairs(sanitizedTags) do
         table.insert(span.tags, {key = tostring(k), value = tostring(v)})
     end
@@ -620,7 +597,6 @@ end
 ---@return table queueSizes Table with current queue sizes
 function monitoring.GetQueueSizes()
     local activeCount = 0
-
     for _ in pairs(activeTraces) do
         activeCount = activeCount + 1
     end
