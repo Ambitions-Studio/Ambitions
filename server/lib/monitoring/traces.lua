@@ -156,7 +156,7 @@ local function setSpanTags(spanId, tags)
         return
     end
 
-    local sanitizedTags = sanitizeData(tags)
+    local sanitizedTags = utils.sanitizeData(tags)
     for k, v in pairs(sanitizedTags) do
         table.insert(span.tags, {key = tostring(k), value = tostring(v)})
     end
