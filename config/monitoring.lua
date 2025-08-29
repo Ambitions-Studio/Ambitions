@@ -1,7 +1,7 @@
 return {
   enabled = true,
 
-  serverName = GetConvar("sv_hostname", "Ambitions-Server"),
+  serverName = GetConvar("sv_hostname", "Server Using Ambitions"),
   globalLabels = {
     framework = "Ambitions",
     version = "0.6.0",
@@ -54,9 +54,9 @@ return {
   },
 
   debug = {
-    enabled = true,
+    enabled = false,
     logPerformance = false,
     validateData = false,
-    printQueueStats = true
+    printQueueStats = false
   }
 }
