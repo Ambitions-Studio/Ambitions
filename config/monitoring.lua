@@ -12,7 +12,6 @@ return {
 
   logsEnabled = true,
   metricsEnabled = true,
-  tracingEnabled = true,
 
   grafanaCloud = {
     instanceId = GetConvar("grafana_cloud_instance_id", ""),
@@ -21,7 +20,6 @@ return {
     endpoints = {
       loki = "https://logs-prod-us-central1.grafana.net/loki/api/v1/push",
       prometheus = "https://prometheus-prod-01-us-central-0.grafana.net/api/v1/push",
-      tempo = "https://tempo-prod-04-us-central-0.grafana.net:443/tempo/api/push"
     }
   },
 
@@ -37,7 +35,6 @@ return {
     endpoints = {
       loki = "http://141.94.99.154:3100/loki/api/v1/push",
       prometheus = "http://141.94.99.154:9091/metrics/job/fivem-server",
-      tempo = "http://141.94.99.154:3200/v1/traces"
     }
   },
 

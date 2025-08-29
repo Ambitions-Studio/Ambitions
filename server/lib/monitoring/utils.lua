@@ -67,22 +67,8 @@ local function getAuthHeader()
     end
 end
 
---- Generate unique trace ID for distributed tracing
----@return string traceId Unique trace identifier
-local function generateTraceId()
-    return string.format("%016x%016x", math.random(0, 2^32-1), math.random(0, 2^32-1))
-end
-
---- Generate unique span ID for tracing spans
----@return string spanId Unique span identifier
-local function generateSpanId()
-    return string.format("%016x", math.random(0, 2^32-1))
-end
-
 return {
     base64Encode = base64Encode,
     sanitizeData = sanitizeData,
-    getAuthHeader = getAuthHeader,
-    generateTraceId = generateTraceId,
-    generateSpanId = generateSpanId
+    getAuthHeader = getAuthHeader
 }
