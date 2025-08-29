@@ -21,6 +21,7 @@ local function parseModule(name)
     return CURRENT_RESOURCE, name:gsub("%.", "/")
 end
 
+
 --- Load and execute a Lua file from a resource
 ---@param resource string The resource name to load from
 ---@param filepath string The file path within the resource
@@ -33,15 +34,20 @@ local function loadFile(resource, filepath, moduleName)
         return false
     end
 
-    local env = setmetatable({}, { __index = _G })
-    env.require = _G.require
+    local originalResource = CURRENT_RESOURCE
 
-    local chunk, compileError = load(source, ("@%s/%s"):format(resource, filepath), "t", env)
+    CURRENT_RESOURCE = resource
+
+    local chunk, compileError = load(source, ("@%s/%s"):format(resource, filepath), "t", _G)
     if not chunk then
+        CURRENT_RESOURCE = originalResource
         error(("Failed to compile module '%s': %s"):format(moduleName, compileError), 0)
     end
 
     local success, result = pcall(chunk)
+
+    CURRENT_RESOURCE = originalResource
+
     if not success then
         error(("Runtime error in module '%s': %s"):format(moduleName, result), 0)
     end
