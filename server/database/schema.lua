@@ -47,7 +47,7 @@ return {
           name = "last_played_character",
           type = "VARCHAR",
           length = 15,
-          null = true
+          default = "NULL"
         },
         {
           name = "total_playtime",
@@ -110,6 +110,47 @@ return {
           length = 15,
           notNull = true,
           unique = true
+        },
+        {
+          name = "firstname",
+          type = "VARCHAR",
+          length = 50,
+          notNull = true
+        },
+        {
+          name = "lastname",
+          type = "VARCHAR",
+          length = 50,
+          notNull = true
+        },
+        {
+          name = "dateofbirth",
+          type = "VARCHAR",
+          length = 10,
+          notNull = true
+        },
+        {
+          name = "sex",
+          type = "VARCHAR",
+          length = 1,
+          notNull = true
+        },
+        {
+          name = "nationality",
+          type = "VARCHAR",
+          length = 50,
+          notNull = true
+        },
+        {
+          name = "height",
+          type = "INT",
+          unsigned = true,
+          notNull = true
+        },
+        {
+          name = "appearance",
+          type = "LONGTEXT",
+          default = "NULL"
         },
         {
           name = "group",

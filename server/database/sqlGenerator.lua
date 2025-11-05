@@ -35,6 +35,8 @@ local function GenerateColumnDefinition(columnName, columnConfig)
   if columnConfig.default then
     if columnConfig.default == "CURRENT_TIMESTAMP" then
       definition = definition .. " DEFAULT CURRENT_TIMESTAMP"
+    elseif columnConfig.default == "NULL" then
+      definition = definition .. " DEFAULT NULL"
     else
       definition = definition .. " DEFAULT '" .. columnConfig.default .. "'"
     end
