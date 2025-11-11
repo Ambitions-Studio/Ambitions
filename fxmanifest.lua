@@ -14,6 +14,10 @@ name 'Ambitions'
 
 lua54 'yes'
 
+shared_script 'shared/lib/callback/callback.lua'
+server_script 'server/lib/callback/callback.lua'
+client_script 'client/lib/callback/callback.lua'
+
 shared_script {
     'shared/init.lua',
 
