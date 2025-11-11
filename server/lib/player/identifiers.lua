@@ -63,9 +63,13 @@ function amb.getPlayerIdentifers(playerId)
                 return nil
             end
 
-            local _, identifierValue = fullIdentifier:match("^([^:]+):(.+)$")
+            local identifierType, identifierValue = fullIdentifier:match("^([^:]+):(.+)$")
 
-            return identifierValue or fullIdentifier
+            if identifierValue then
+                return identifierValue
+            end
+
+            return fullIdentifier
         end
     })
 
