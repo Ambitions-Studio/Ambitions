@@ -71,12 +71,13 @@ local function checkPlayerCallLimit(playerId)
 end
 
 --- Execute server callback handler with error protection
----@param handler function The callback handler function
+---@param handler function|table The callback handler function or callable table
 ---@param source number The player source
 ---@param ... any Arguments to pass to the handler
 ---@return boolean success Whether execution was successful
 ---@return any ... Results from the handler
 local function executeServerCallbackHandler(handler, source, ...)
+    -- Si c'est une table avec __call, l'appeler directement fonctionne
     local success, result = pcall(handler, source, ...)
 
     if not success then
@@ -93,17 +94,9 @@ end
 ---@param handler function The function to execute when called (receives source as first parameter)
 ---@return boolean success Whether registration was successful
 function amb.registerServerCallback(callbackName, handler)
-    print('[DEBUG] registerServerCallback called with:')
-    print('[DEBUG]   callbackName:', callbackName)
-    print('[DEBUG]   handler type:', type(handler))
-    print('[DEBUG]   handler value:', handler)
-
-    -- Accepter les fonctions ET les tables avec __call metamethod
+    -- Accepter les fonctions ET les tables avec __call metamethod (pour cross-resource)
     local handlerType = type(handler)
     local isCallable = handlerType == 'function' or (handlerType == 'table' and getmetatable(handler) and getmetatable(handler).__call)
-
-    print('[DEBUG]   is callable:', isCallable)
-    print('[DEBUG]   metatable:', getmetatable(handler))
 
     if not isCallable then
         amb.print.error('Callback handler must be a function or callable table, got:', type(handler))

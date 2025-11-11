@@ -75,8 +75,12 @@ end
 ---@param handler function The function to execute when called
 ---@return boolean success Whether registration was successful
 function amb.registerClientCallback(callbackName, handler)
-    if type(handler) ~= 'function' then
-        amb.print.error('Callback handler must be a function, got:', type(handler))
+    -- Accepter les fonctions ET les tables avec __call metamethod (pour cross-resource)
+    local handlerType = type(handler)
+    local isCallable = handlerType == 'function' or (handlerType == 'table' and getmetatable(handler) and getmetatable(handler).__call)
+
+    if not isCallable then
+        amb.print.error('Callback handler must be a function or callable table, got:', type(handler))
         return false
     end
 
@@ -99,8 +103,12 @@ end
 ---@param responseHandler function Function to handle the response
 ---@param ... any Arguments to send to the server callback
 function amb.triggerServerCallback(callbackName, options, responseHandler, ...)
-    if type(responseHandler) ~= 'function' then
-        amb.print.error('Response handler must be a function for callback:', callbackName)
+    -- Accepter les fonctions ET les tables avec __call metamethod (pour cross-resource)
+    local responseHandlerType = type(responseHandler)
+    local isCallable = responseHandlerType == 'function' or (responseHandlerType == 'table' and getmetatable(responseHandler) and getmetatable(responseHandler).__call)
+
+    if not isCallable then
+        amb.print.error('Response handler must be a function or callable table for callback:', callbackName)
 
         return
     end
