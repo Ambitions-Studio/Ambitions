@@ -2,10 +2,18 @@ local ambitionsPrint = require('shared.lib.log.print')
 
 MySQL.ready(function()
   ambitionsPrint.success(('^6[%s - %s] ^5 - Framework initialized'):format(GetInvokingResource():upper(), GetCurrentResourceName()))
-
-  -- Déclencher le test des callbacks après l'initialisation
-  TriggerClientEvent('ambitions:test:startCallbackTest', -1)
+  ambitionsPrint.info('💡 Tapez /testcallbacks en jeu pour tester le système de callbacks')
 end)
+
+RegisterCommand('testcallbacks', function(source)
+  if source == 0 then
+    print('[ERROR] Cette commande doit être exécutée en jeu, pas depuis la console serveur')
+    return
+  end
+
+  ambitionsPrint.info('🧪 Lancement des tests callback pour le joueur', source, '(' .. GetPlayerName(source) .. ')')
+  TriggerClientEvent('ambitions:test:startCallbackTest', source)
+end, false)
 
 -- Test du nouveau système de callback
 local callback = require('server.lib.callback')
