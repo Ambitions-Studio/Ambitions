@@ -93,6 +93,11 @@ end
 ---@param handler function The function to execute when called (receives source as first parameter)
 ---@return boolean success Whether registration was successful
 function amb.registerServerCallback(callbackName, handler)
+    print('[DEBUG] registerServerCallback called with:')
+    print('[DEBUG]   callbackName:', callbackName)
+    print('[DEBUG]   handler type:', type(handler))
+    print('[DEBUG]   handler value:', handler)
+
     if type(handler) ~= 'function' then
         amb.print.error('Callback handler must be a function, got:', type(handler))
 
