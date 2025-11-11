@@ -22,7 +22,6 @@ server_scripts {
     'server/init.lua',
     'server/database/autoMigration.lua',
     'server/modules/core/savePlayer.lua',
-    'server/init.lua'
 }
 
 client_scripts {
