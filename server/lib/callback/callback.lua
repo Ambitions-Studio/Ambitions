@@ -98,8 +98,15 @@ function amb.registerServerCallback(callbackName, handler)
     print('[DEBUG]   handler type:', type(handler))
     print('[DEBUG]   handler value:', handler)
 
-    if type(handler) ~= 'function' then
-        amb.print.error('Callback handler must be a function, got:', type(handler))
+    -- Accepter les fonctions ET les tables avec __call metamethod
+    local handlerType = type(handler)
+    local isCallable = handlerType == 'function' or (handlerType == 'table' and getmetatable(handler) and getmetatable(handler).__call)
+
+    print('[DEBUG]   is callable:', isCallable)
+    print('[DEBUG]   metatable:', getmetatable(handler))
+
+    if not isCallable then
+        amb.print.error('Callback handler must be a function or callable table, got:', type(handler))
 
         return false
     end
