@@ -1,77 +1,14 @@
---- Get all identifiers for a player and return them in a structured table with values only
----@param playerId string|number The server ID of the player
----@return table identifiers Table containing all player identifiers with only the values (no prefixes)
-local function getAllIdentifiers(playerId)
-    local rawIdentifiers = GetPlayerIdentifiers(playerId)
-
-    if not rawIdentifiers then
-        return {}
-    end
-
-    local identifiers = {}
-
-    for i = 1, #rawIdentifiers do
-        local identifier = rawIdentifiers[i]
-        local identifierType, identifierValue = identifier:match("^([^:]+):(.+)$")
-
-        if identifierType and identifierValue then
-            identifiers[identifierType] = identifierValue
-        end
-    end
-
-    return identifiers
-end
-
---- Check if a player has a specific identifier type
----@param playerId string|number The server ID of the player
----@param identifierType string The type of identifier to check for
----@return boolean hasIdentifier Whether the player has this identifier type
-local function hasIdentifier(playerId, identifierType)
-    local identifier = GetPlayerIdentifierByType(playerId, identifierType)
-
-    return identifier ~= nil and identifier ~= ""
-end
-
 --- Get identifiers object for a player with direct access to all identifier types
 ---@param playerId string|number The server ID of the player
 ---@return table identifiers Object with direct access to .license, .steam, .discord, etc. (values only, no prefixes)
 function amb.getPlayerIdentifers(playerId)
-    local obj = {
-        --- Get all identifiers for this player
-        ---@return table allIdentifiers Table with all identifiers organized by type (values only)
-        getAll = function()
-            return getAllIdentifiers(playerId)
-        end,
+    local identifiers = {}
 
-        --- Check if this player has a specific identifier type
-        ---@param identifierType string The type of identifier to check for
-        ---@return boolean hasIdentifier Whether the player has this identifier type
-        has = function(identifierType)
-            return hasIdentifier(playerId, identifierType)
-        end
-    }
+    identifiers['name'] = GetPlayerName(playerId)
+    for _,v in pairs(GetPlayerIdentifiers(playerId)) do
+        identifiers[v:match("^(%w+)")] = v:match(":(.+)$")
+    end
 
-    setmetatable(obj, {
-        __index = function(_, key)
-            if rawget(obj, key) then
-                return rawget(obj, key)
-            end
-
-            local fullIdentifier = GetPlayerIdentifierByType(playerId, key)
-
-            if not fullIdentifier then
-                return nil
-            end
-
-            local identifierType, identifierValue = fullIdentifier:match("^([^:]+):(.+)$")
-
-            if identifierValue then
-                return identifierValue
-            end
-
-            return fullIdentifier
-        end
-    })
-
-    return obj
+    amb.print.debug("player's identifiers : ", identifiers)
+    return identifiers
 end
