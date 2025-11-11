@@ -22,12 +22,9 @@ server_scripts {
     'server/init.lua',
     'server/database/autoMigration.lua',
     'server/modules/core/savePlayer.lua',
-    'server/modules/core/saveSpawn.lua',
 }
 
-client_scripts {
-    'client/modules/core/spawnPlayer.lua',
-}
+client_scripts {}
 
 files {
     'verification.lua',
