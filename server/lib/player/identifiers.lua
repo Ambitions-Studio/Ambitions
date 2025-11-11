@@ -4,11 +4,15 @@
 function amb.getPlayerIdentifers(playerId)
     local identifiers = {}
 
-    identifiers['name'] = GetPlayerName(playerId)
-    for _,v in pairs(GetPlayerIdentifiers(playerId)) do
-        identifiers[v:match("^(%w+)")] = v:match(":(.+)$")
+    identifiers.name = GetPlayerName(playerId)
+
+    for _, identifier in pairs(GetPlayerIdentifiers(playerId)) do
+        local identifierType, identifierValue = identifier:match("^([^:]+):(.+)$")
+
+        if identifierType and identifierValue then
+            identifiers[identifierType] = identifierValue
+        end
     end
 
-    amb.print.debug("player's identifiers : ", identifiers)
     return identifiers
 end
