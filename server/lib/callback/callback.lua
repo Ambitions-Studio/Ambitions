@@ -1,7 +1,3 @@
-local callbackRegistry = require('shared.lib.callback')
-local log = require('shared.lib.log.print')
-local ambitionsRandom = require('shared.lib.math.random')
-
 -- Server callback state management
 local serverCallbacks = {
     handlers = {},
@@ -31,7 +27,7 @@ end
 ---@return string requestId Unique request identifier
 local function generateServerRequestId(callbackName, playerId)
     local timestamp = GetGameTimer()
-    local random = ambitionsRandom.alphanumeric(10)
+    local random = amb.math.randomAlphanumeric(10)
 
     return ('%s:%d:%d:%s'):format(callbackName, playerId, timestamp, random)
 end
@@ -67,7 +63,7 @@ local function checkPlayerCallLimit(playerId)
     end
 
     if activeCallsForPlayer >= serverCallbacks.config.maxConcurrentCallsPerPlayer then
-        log.warning('Player', playerId, 'exceeded concurrent callback limit:', activeCallsForPlayer)
+        amb.print.warning('Player', playerId, 'exceeded concurrent callback limit:', activeCallsForPlayer)
         return false
     end
 
@@ -84,7 +80,7 @@ local function executeServerCallbackHandler(handler, source, ...)
     local success, result = pcall(handler, source, ...)
 
     if not success then
-        log.error('Server callback handler failed for source', source, ':', result)
+        amb.print.error('Server callback handler failed for source', source, ':', result)
 
         return false, nil
     end
@@ -96,22 +92,22 @@ end
 ---@param callbackName string The callback identifier
 ---@param handler function The function to execute when called (receives source as first parameter)
 ---@return boolean success Whether registration was successful
-local function registerServerCallback(callbackName, handler)
+function amb.registerServerCallback(callbackName, handler)
     if type(handler) ~= 'function' then
-        log.error('Callback handler must be a function, got:', type(handler))
+        amb.print.error('Callback handler must be a function, got:', type(handler))
 
         return false
     end
 
     local resourceName = getResourceContext()
-    local success = callbackRegistry.register(callbackName, resourceName)
+    local success = registerCallbackHandler(callbackName, resourceName)
 
     if not success then
         return false
     end
 
     serverCallbacks.handlers[callbackName] = handler
-    log.debug('Registered server callback:', callbackName)
+    amb.print.debug('Registered server callback:', callbackName)
 
     return true
 end
@@ -122,16 +118,16 @@ end
 ---@param options table|false Options for the call (timeout) or false for defaults
 ---@param responseHandler function Function to handle the response
 ---@param ... any Arguments to send to the client callback
-local function triggerClientCallback(callbackName, playerId, options, responseHandler, ...)
+function amb.triggerClientCallback(callbackName, playerId, options, responseHandler, ...)
     if type(responseHandler) ~= 'function' then
-        log.error('Response handler must be a function for callback:', callbackName)
+        amb.print.error('Response handler must be a function for callback:', callbackName)
 
         return
     end
 
     local isValid, reason = validatePlayerConnection(playerId)
     if not isValid then
-        log.error('Cannot trigger callback for invalid player', playerId, ':', reason)
+        amb.print.error('Cannot trigger callback for invalid player', playerId, ':', reason)
 
         return
     end
@@ -158,7 +154,7 @@ local function triggerClientCallback(callbackName, playerId, options, responseHa
         createdAt = GetGameTimer()
     }
 
-    TriggerClientEvent(callbackRegistry.events.VALIDATE, playerId, callbackName, resourceName, requestId)
+    TriggerClientEvent('ambitions:callback:validate', playerId, callbackName, resourceName, requestId)
     TriggerClientEvent('ambitions:callback:client:call', playerId, callbackName, resourceName, requestId, ...)
 
     SetTimeout(callOptions.timeout, function()
@@ -166,7 +162,7 @@ local function triggerClientCallback(callbackName, playerId, options, responseHa
 
         if pendingRequest then
             serverCallbacks.pendingRequests[requestId] = nil
-            log.warning('Client callback request timed out:', callbackName, 'for player', playerId, 'after', callOptions.timeout, 'ms')
+            amb.print.warning('Client callback request timed out:', callbackName, 'for player', playerId, 'after', callOptions.timeout, 'ms')
         end
     end)
 end
@@ -176,7 +172,7 @@ RegisterNetEvent(SERVER_EVENTS.INCOMING_CALL, function(callbackName, requestingR
     local playerSource = source
 
     if not handler then
-        log.warning('Received call for unregistered callback:', callbackName, 'from player', playerSource)
+        amb.print.warning('Received call for unregistered callback:', callbackName, 'from player', playerSource)
         TriggerClientEvent(('ambitions:callback:response:%s'):format(requestingResource), playerSource, requestId, 'callback_not_registered')
 
         return
@@ -186,7 +182,7 @@ RegisterNetEvent(SERVER_EVENTS.INCOMING_CALL, function(callbackName, requestingR
     local isValid, reason = validatePlayerConnection(playerSource)
 
     if not isValid then
-        log.warning('Invalid player', playerSource, 'tried to call callback:', callbackName, '- reason:', reason)
+        amb.print.warning('Invalid player', playerSource, 'tried to call callback:', callbackName, '- reason:', reason)
         return
     end
 
@@ -198,7 +194,7 @@ RegisterNetEvent('ambitions:callback:client:response', function(requestingResour
     local pendingRequest = serverCallbacks.pendingRequests[requestId]
 
     if not pendingRequest then
-        log.warning('Received response for unknown request:', requestId)
+        amb.print.warning('Received response for unknown request:', requestId)
 
         return
     end
@@ -207,17 +203,10 @@ RegisterNetEvent('ambitions:callback:client:response', function(requestingResour
 
     local args = {...}
     if args[1] == false and args[2] == 'callback_not_registered' then
-        log.error('Client callback not registered:', pendingRequest.callbackName, 'for player', pendingRequest.playerId)
+        amb.print.error('Client callback not registered:', pendingRequest.callbackName, 'for player', pendingRequest.playerId)
 
         return
     end
 
     pendingRequest.responseHandler(...)
 end)
-
-local ambitionsCallback = {
-    register = registerServerCallback,
-    trigger = triggerClientCallback
-}
-
-return ambitionsCallback

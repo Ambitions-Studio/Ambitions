@@ -1,7 +1,7 @@
 --- Database schema configuration for auto-migration system
 --- This file defines all tables and their structure in a declarative way
 ---@return table schema The complete database schema configuration
-return {
+schemaConfig = {
   version = "1.0.0",
   charset = "utf8mb4",
   collation = "utf8mb4_unicode_ci",

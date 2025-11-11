@@ -1,4 +1,4 @@
-local monitoringConfig = require("config.monitoring")
+amb.grafana = {}
 
 --- Encodes a string to base64 for HTTP basic authentication
 ---@param input string The string to encode
@@ -24,7 +24,7 @@ end
 --- Sanitize sensitive data from a table
 ---@param data table The data to sanitize
 ---@return table sanitized The sanitized data
-local function sanitizeData(data)
+function sanitizeGrafanaData(data)
     if not monitoringConfig.security.sanitizeData then
         return data
     end
@@ -43,7 +43,7 @@ local function sanitizeData(data)
         end
 
         sanitized[k] = shouldRedact and monitoringConfig.security.redactionPlaceholder 
-                      or (type(v) == "table" and sanitizeData(v) or v)
+                      or (type(v) == "table" and sanitizeGrafanaData(v) or v)
     end
 
     return sanitized
@@ -51,7 +51,7 @@ end
 
 --- Get authentication header based on deployment type and config
 ---@return string auth The authorization header
-local function getAuthHeader()
+function getGrafanaAuthHeader()
     local currentConfig = monitoringConfig.deploymentType == "grafana_cloud" and monitoringConfig.grafanaCloud or monitoringConfig.grafanaOss
 
     if monitoringConfig.deploymentType == "grafana_cloud" then
@@ -66,9 +66,3 @@ local function getAuthHeader()
         end
     end
 end
-
-return {
-    base64Encode = base64Encode,
-    sanitizeData = sanitizeData,
-    getAuthHeader = getAuthHeader
-}

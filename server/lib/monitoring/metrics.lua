@@ -1,29 +1,25 @@
-local log = require("shared.lib.log.print")
-local monitoringConfig = require("config.monitoring")
-local utils = require("server.lib.monitoring.utils")
-
 local metricQueue = {}
 
 local BATCH_SIZE = 50
 
 --- Flush metric queue to Grafana Prometheus
-local function flushMetricQueue()
+function amb.grafana.flushMetricQueue()
     if #metricQueue == 0 or not monitoringConfig.metricsEnabled then return end
 
     local currentConfig = monitoringConfig.deploymentType == "grafana_cloud" and monitoringConfig.grafanaCloud or monitoringConfig.grafanaOss
-    local auth = utils.getAuthHeader()
+    local auth = getGrafanaAuthHeader()
     local metricsText = table.concat(metricQueue, "\n") .. "\n"
     
     if monitoringConfig.debug.enabled then
-        log.debug(("[Ambitions:Monitoring] Sending %d metrics to %s"):format(#metricQueue, currentConfig.endpoints.prometheus))
-        log.debug(("[Ambitions:Monitoring] Metrics payload: %s"):format(metricsText:sub(1, 200)))
+        amb.print.debug(("[Ambitions:Monitoring] Sending %d metrics to %s"):format(#metricQueue, currentConfig.endpoints.prometheus))
+        amb.print.debug(("[Ambitions:Monitoring] Metrics payload: %s"):format(metricsText:sub(1, 200)))
     end
 
     PerformHttpRequest(currentConfig.endpoints.prometheus, function(code, _, _)
         if code ~= 200 and code ~= 204 then
-            log.warning(("[Ambitions:Monitoring] Failed to send %d metrics: HTTP %s"):format(#metricQueue, code))
+            amb.print.warning(("[Ambitions:Monitoring] Failed to send %d metrics: HTTP %s"):format(#metricQueue, code))
         elseif monitoringConfig.debug.enabled then
-            log.debug(("[Ambitions:Monitoring] Successfully sent %d metrics"):format(#metricQueue))
+            amb.print.debug(("[Ambitions:Monitoring] Successfully sent %d metrics"):format(#metricQueue))
         end
     end, "PUT", metricsText, {
         ["Content-Type"] = "text/plain"
@@ -37,7 +33,7 @@ end
 ---@param value number The counter value to add
 ---@param labels table? Optional labels as key-value pairs
 ---@param help string? Optional help text describing the metric
-local function sendCounter(name, value, labels, help)
+function amb.grafana.sendCounterMetric(name, value, labels, help)
     if not monitoringConfig.metricsEnabled then return end
 
     local allLabels = {}
@@ -46,7 +42,7 @@ local function sendCounter(name, value, labels, help)
     end
 
     if labels then
-        local sanitizedLabels = utils.sanitizeData(labels)
+        local sanitizedLabels = sanitizeGrafanaData(labels)
         for k, v in pairs(sanitizedLabels) do
             allLabels[k] = v
         end
@@ -71,7 +67,7 @@ local function sendCounter(name, value, labels, help)
     table.insert(metricQueue, valueLine)
 
     if #metricQueue >= BATCH_SIZE then
-        flushMetricQueue()
+        amb.grafana.flushMetricQueue()
     end
 end
 
@@ -80,7 +76,7 @@ end
 ---@param value number The gauge value
 ---@param labels table? Optional labels as key-value pairs
 ---@param help string? Optional help text describing the metric
-local function sendGauge(name, value, labels, help)
+function amb.grafana.sendMetricGauge(name, value, labels, help)
     if not monitoringConfig.metricsEnabled then return end
 
     local allLabels = {}
@@ -89,7 +85,7 @@ local function sendGauge(name, value, labels, help)
     end
 
     if labels then
-        local sanitizedLabels = utils.sanitizeData(labels)
+        local sanitizedLabels = sanitizeGrafanaData(labels)
         for k, v in pairs(sanitizedLabels) do
             allLabels[k] = v
         end
@@ -114,7 +110,7 @@ local function sendGauge(name, value, labels, help)
     table.insert(metricQueue, valueLine)
 
     if #metricQueue >= BATCH_SIZE then
-        flushMetricQueue()
+        amb.grafana.flushMetricQueue()
     end
 end
 
@@ -124,7 +120,7 @@ end
 ---@param buckets table Array of bucket boundaries
 ---@param labels table? Optional labels as key-value pairs
 ---@param help string? Optional help text describing the metric
-local function sendHistogram(name, value, buckets, labels, help)
+function amb.grafana.sendMetricHistogram(name, value, buckets, labels, help)
     if not monitoringConfig.metricsEnabled then return end
 
     local allLabels = {}
@@ -133,7 +129,7 @@ local function sendHistogram(name, value, buckets, labels, help)
     end
 
     if labels then
-        local sanitizedLabels = utils.sanitizeData(labels)
+        local sanitizedLabels = sanitizeGrafanaData(labels)
         for k, v in pairs(sanitizedLabels) do
             allLabels[k] = v
         end
@@ -177,20 +173,12 @@ local function sendHistogram(name, value, buckets, labels, help)
     table.insert(metricQueue, sumLine)
 
     if #metricQueue >= BATCH_SIZE then
-        flushMetricQueue()
+        amb.grafana.flushMetricQueue()
     end
 end
 
 --- Get current metric queue size for monitoring
 ---@return number size The current metric queue size
-local function getQueueSize()
+function amb.grafana.getMetricQueueSize()
     return #metricQueue
 end
-
-return {
-    Counter = sendCounter,
-    Gauge = sendGauge,
-    Histogram = sendHistogram,
-    Flush = flushMetricQueue,
-    GetQueueSize = getQueueSize
-}

@@ -32,12 +32,10 @@ local function hasIdentifier(playerId, identifierType)
     return identifier ~= nil and identifier ~= ""
 end
 
-local identifiers = {}
-
 --- Get identifiers object for a player with direct access to all identifier types
 ---@param playerId string|number The server ID of the player
 ---@return table identifiers Object with direct access to .license, .steam, .discord, etc. (values only, no prefixes)
-function identifiers.get(playerId)
+function amb.getPlayerIdentifers(playerId)
     local obj = {
         --- Get all identifiers for this player
         ---@return table allIdentifiers Table with all identifiers organized by type (values only)
@@ -73,5 +71,3 @@ function identifiers.get(playerId)
 
     return obj
 end
-
-return identifiers

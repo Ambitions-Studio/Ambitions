@@ -1,9 +1,7 @@
-local callbackRegistry = {}
 local resourceCallbacks = {}
-local log = require('shared.lib.log.print')
 
 --- Constants for the callback system
-local CALLBACK_EVENTS = {
+local CALLBACK_EVENTS <const> = {
     REGISTER = 'ambitions:callback:register',
     UNREGISTER = 'ambitions:callback:unregister',
     VALIDATE = 'ambitions:callback:validate'
@@ -23,7 +21,7 @@ local function initializeResourceCallbacks(resourceName)
             registered = {},
             createdAt = GetGameTimer()
         }
-        log.debug('Initialized callback storage for resource:', resourceName)
+        amb.print.debug('Initialized callback storage for resource:', resourceName)
     end
 end
 
@@ -37,7 +35,7 @@ local function cleanupResourceCallbacks(stoppedResource)
         end
 
         resourceCallbacks[stoppedResource] = nil
-        log.debug('Cleaned up', callbackCount, 'callbacks for stopped resource:', stoppedResource)
+        amb.print.debug('Cleaned up', callbackCount, 'callbacks for stopped resource:', stoppedResource)
     end
 end
 
@@ -45,12 +43,12 @@ end
 ---@param callbackName string The callback identifier
 ---@param resourceName string The owning resource
 ---@return boolean success Whether registration was successful
-local function registerCallbackHandler(callbackName, resourceName)
+function registerCallbackHandler(callbackName, resourceName)
     initializeResourceCallbacks(resourceName)
 
     for resource, data in pairs(resourceCallbacks) do
         if resource ~= resourceName and data.registered[callbackName] then
-            log.error('Callback conflict:', callbackName, 'already registered by', resource)
+            amb.print.error('Callback conflict:', callbackName, 'already registered by', resource)
 
             return false
         end
@@ -61,7 +59,7 @@ local function registerCallbackHandler(callbackName, resourceName)
         calls = 0
     }
 
-    log.debug('Registered callback handler:', callbackName, 'for resource:', resourceName)
+    amb.print.debug('Registered callback handler:', callbackName, 'for resource:', resourceName)
 
     return true
 end
@@ -70,10 +68,10 @@ end
 ---@param callbackName string The callback identifier
 ---@param resourceName string The owning resource
 ---@return boolean success Whether unregistration was successful
-local function unregisterCallbackHandler(callbackName, resourceName)
+function unregisterCallbackHandler(callbackName, resourceName)
     if resourceCallbacks[resourceName] and resourceCallbacks[resourceName].registered[callbackName] then
         resourceCallbacks[resourceName].registered[callbackName] = nil
-        log.debug('Unregistered callback handler:', callbackName, 'from resource:', resourceName)
+        amb.print.debug('Unregistered callback handler:', callbackName, 'from resource:', resourceName)
 
         return true
     end
@@ -85,7 +83,7 @@ end
 ---@param callbackName string The callback to validate
 ---@return boolean exists Whether the callback exists
 ---@return string|nil ownerResource The resource that owns the callback
-local function validateCallbackExists(callbackName)
+function validateCallbackExists(callbackName)
     for resource, data in pairs(resourceCallbacks) do
         if data.registered[callbackName] then
             data.registered[callbackName].calls = data.registered[callbackName].calls + 1
@@ -99,7 +97,7 @@ end
 
 --- Get callback statistics for monitoring
 ---@return table stats Detailed callback statistics
-local function getCallbackStatistics()
+function getCallbackStatistics()
     local stats = {
         totalResources = 0,
         totalCallbacks = 0,
@@ -151,11 +149,3 @@ RegisterNetEvent(CALLBACK_EVENTS.VALIDATE, function(callbackName, requestingReso
         end
     end
 end)
-
-callbackRegistry.register = registerCallbackHandler
-callbackRegistry.unregister = unregisterCallbackHandler
-callbackRegistry.validate = validateCallbackExists
-callbackRegistry.getStats = getCallbackStatistics
-callbackRegistry.events = CALLBACK_EVENTS
-
-return callbackRegistry
