@@ -1,5 +1,11 @@
 local resourceCallbacks = {}
 
+--- GLOBAL CALLBACK STORAGE
+local globalCallbackHandlers = {
+    server = {},
+    client = {}
+}
+
 --- Constants for the callback system
 local CALLBACK_EVENTS <const> = {
     REGISTER = 'ambitions:callback:register',
@@ -125,6 +131,23 @@ function getCallbackStatistics()
     end
 
     return stats
+end
+
+--- Store callback handler globally
+---@param callbackName string The callback identifier
+---@param handler function The callback handler
+---@param side string 'server' or 'client'
+function storeCallbackHandler(callbackName, handler, side)
+    globalCallbackHandlers[side][callbackName] = handler
+    amb.print.debug('[GLOBAL] Stored', side, 'callback handler:', callbackName)
+end
+
+--- Get callback handler from global storage (dans Ambitions)
+---@param callbackName string The callback identifier
+---@param side string 'server' or 'client'
+---@return function|nil handler The callback handler or nil
+function getCallbackHandler(callbackName, side)
+    return globalCallbackHandlers[side][callbackName]
 end
 
 -- Event handlers for resource lifecycle

@@ -92,6 +92,7 @@ function amb.registerClientCallback(callbackName, handler)
     end
 
     clientCallbacks.handlers[callbackName] = handler
+    storeCallbackHandler(callbackName, handler, 'client')
     amb.print.debug('Registered client callback:', callbackName)
 
     return true
@@ -163,7 +164,7 @@ function amb.triggerServerCallback(callbackName, options, responseHandler, ...)
 end
 
 RegisterNetEvent(CLIENT_EVENTS.INCOMING_CALL, function(callbackName, requestingResource, requestId, ...)
-    local handler = clientCallbacks.handlers[callbackName]
+    local handler = getCallbackHandler(callbackName, 'client')
 
     if not handler then
         amb.print.warning('Received call for unregistered callback:', callbackName)
