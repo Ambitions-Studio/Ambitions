@@ -46,7 +46,6 @@ server_scripts {
 
 client_scripts {
     'client/lib/**/*.lua',
-
     'client/init.lua'
 }
 
