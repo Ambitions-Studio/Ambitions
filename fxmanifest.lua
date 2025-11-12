@@ -24,7 +24,9 @@ server_scripts {
     'server/modules/core/savePlayer.lua',
 }
 
-client_scripts {}
+client_scripts {
+    'client/init.lua'
+}
 
 files {
     'verification.lua',
