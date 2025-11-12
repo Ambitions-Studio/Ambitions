@@ -76,11 +76,9 @@ local function generateString(length, charset)
   return table.concat(result)
 end
 
-local ambitionsRandom = {}
-
 --- Initialize the random number generator with optional seed
 ---@param seed? number Custom seed value for reproducible sequences
-function ambitionsRandom.setSeed(seed)
+function amb.math.setRandomSeed(seed)
   initializeSeed(seed)
 end
 
@@ -88,7 +86,7 @@ end
 ---@param min number Minimum value (inclusive)
 ---@param max number Maximum value (inclusive)
 ---@return number result Random integer in specified range
-function ambitionsRandom.integer(min, max)
+function amb.math.randomInteger(min, max)
   return math.random(min, max)
 end
 
@@ -96,7 +94,7 @@ end
 ---@param min? number Minimum value (inclusive), defaults to 0
 ---@param max? number Maximum value (exclusive), defaults to 1
 ---@return number result Random float in specified range
-function ambitionsRandom.float(min, max)
+function amb.math.randomFloat(min, max)
   min = min or 0
   max = max or 1
 
@@ -106,7 +104,7 @@ end
 --- Generate random boolean with optional probability
 ---@param probability? number Chance of returning true (0.0 to 1.0), defaults to 0.5
 ---@return boolean result Random boolean value
-function ambitionsRandom.boolean(probability)
+function amb.math.randomBoolean(probability)
   probability = probability or 0.5
 
   return math.random() < probability
@@ -116,7 +114,7 @@ end
 ---@generic T
 ---@param array T[] Array to pick from
 ---@return T|nil result Random element from array or nil if empty
-function ambitionsRandom.choice(array)
+function amb.math.randomChoice(array)
   if #array == 0 then
     return nil
   end
@@ -129,7 +127,7 @@ end
 ---@param array T[] Array to pick from
 ---@param count number Number of elements to pick
 ---@return T[] results Array of randomly selected elements
-function ambitionsRandom.sample(array, count)
+function amb.math.randomSample(array, count)
   if count <= 0 or #array == 0 then
     return {}
   end
@@ -156,7 +154,7 @@ end
 ---@param options T[] Array of options to choose from
 ---@param weights number[] Array of weights corresponding to options
 ---@return T|nil result Randomly selected option based on weights
-function ambitionsRandom.weighted(options, weights)
+function amb.math.randomWeighted(options, weights)
   if #options == 0 or #weights == 0 or #options ~= #weights then
     return nil
   end
@@ -170,7 +168,7 @@ end
 ---@generic T
 ---@param array T[] Array to shuffle
 ---@return T[] shuffled New array with shuffled elements
-function ambitionsRandom.shuffle(array)
+function amb.math.randomShuffle(array)
   local shuffled = {}
 
   for i, v in ipairs(array) do
@@ -185,8 +183,8 @@ end
 ---@param centerY number Center Y coordinate
 ---@param radius number Circle radius
 ---@return number x, number y Random point coordinates within circle
-function ambitionsRandom.pointInCircle(centerX, centerY, radius)
-  local angle = ambitionsRandom.float(0, 2 * math.pi)
+function amb.math.randomPointInCircle(centerX, centerY, radius)
+  local angle = amb.math.randomFloat(0, 2 * math.pi)
   local distance = radius * math.sqrt(math.random())
 
   return centerX + distance * math.cos(angle), centerY + distance * math.sin(angle)
@@ -194,7 +192,7 @@ end
 
 --- Generate random UUID version 4
 ---@return string uuid Generated UUID string
-function ambitionsRandom.uuid()
+function amb.math.randomUUID()
   local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
   return template:gsub('[xy]', function(c)
@@ -207,56 +205,54 @@ end
 --- Generate random alphanumeric string
 ---@param length number Length of string to generate
 ---@return string result Random alphanumeric string
-function ambitionsRandom.alphanumeric(length)
+function amb.math.randomAlphanumeric(length)
   return generateString(length, CHARSET_ALPHANUMERIC)
 end
 
 --- Generate random alphabetic string
 ---@param length number Length of string to generate
 ---@return string result Random alphabetic string
-function ambitionsRandom.alpha(length)
+function amb.math.randomAlpha(length)
   return generateString(length, CHARSET_ALPHA)
 end
 
 --- Generate random numeric string
 ---@param length number Length of string to generate
 ---@return string result Random numeric string
-function ambitionsRandom.numeric(length)
+function amb.math.randomNumeric(length)
   return generateString(length, CHARSET_NUMERIC)
 end
 
 --- Generate random hexadecimal string
 ---@param length number Length of string to generate
 ---@return string result Random hexadecimal string
-function ambitionsRandom.hex(length)
+function amb.math.randomHex(length)
   return generateString(length, CHARSET_HEX)
 end
 
 --- Generate random RGB color values
 ---@return number red, number green, number blue RGB values (0-255)
-function ambitionsRandom.color()
+function amb.math.randomColor()
   return math.random(0, 255), math.random(0, 255), math.random(0, 255)
 end
 
 --- Generate random percentage value
 ---@return number percentage Random percentage (0-100)
-function ambitionsRandom.percentage()
-  return ambitionsRandom.float(0, 100)
+function amb.math.randomPercentage()
+  return amb.math.randomFloat(0, 100)
 end
 
 --- Generate random angle in degrees
 ---@return number degrees Random angle (0-359)
-function ambitionsRandom.angle()
-  return ambitionsRandom.float(0, 360)
+function amb.math.randomAngle()
+  return amb.math.randomFloat(0, 360)
 end
 
 --- Generate random sign (-1 or 1)
 ---@return number sign Random sign value
-function ambitionsRandom.sign()
-  return ambitionsRandom.boolean() and 1 or -1
+function amb.math.randomSign()
+  return amb.math.randomBoolean() and 1 or -1
 end
 
 -- Initialize with default seed on module load
 initializeSeed()
-
-return ambitionsRandom

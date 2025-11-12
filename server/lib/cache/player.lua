@@ -1,16 +1,14 @@
-local ambitionsPrint = require('shared.lib.log.print')
+amb.cache = {}
 
 local cache = {}
-
-local playerCache = {}
 
 --- Add a player to the cache
 ---@param sessionId number The session ID of the player
 ---@param userObject AmbitionsUserObject The user object to cache
 ---@return boolean success Whether the operation was successful
-function playerCache.add(sessionId, userObject)
+function amb.cache.addPlayer(sessionId, userObject)
   if not sessionId or not userObject then
-    ambitionsPrint.error('Invalid parameters for playerCache.add')
+    amb.print.error('Invalid parameters for amb.cache.addPlayer')
     return false
   end
 
@@ -22,21 +20,21 @@ end
 --- Get a player from the cache
 ---@param sessionId number The session ID of the player
 ---@return AmbitionsUserObject | nil userObject The user object or nil if not found
-function playerCache.get(sessionId)
+function amb.cache.getPlayer(sessionId)
   return cache[sessionId]
 end
 
 --- Remove a player from the cache
 ---@param sessionId number The session ID of the player
 ---@return boolean success Whether the operation was successful
-function playerCache.remove(sessionId)
+function amb.cache.removePlayer(sessionId)
   if cache[sessionId] then
     cache[sessionId] = nil
 
     return true
   end
 
-  ambitionsPrint.warning('Attempted to remove non-existent player from cache: ', sessionId)
+  amb.print.warning('Attempted to remove non-existent player from cache: ', sessionId)
 
   return false
 end
@@ -44,19 +42,19 @@ end
 --- Check if a player exists in the cache
 ---@param sessionId number The session ID of the player
 ---@return boolean exists Whether the player exists in cache
-function playerCache.exists(sessionId)
+function amb.cache.doesPlayerExist(sessionId)
   return cache[sessionId] ~= nil
 end
 
 --- Get all cached players
 ---@return table players All cached players indexed by sessionId
-function playerCache.getAll()
+function amb.cache.getAllPlayers()
   return cache
 end
 
 --- Get the count of cached players
 ---@return number count Number of players currently cached
-function playerCache.getCount()
+function amb.cache.getPlayerCount()
   local count = 0
 
   for _ in pairs(cache) do
@@ -68,7 +66,7 @@ end
 
 --- Get all online player session IDs
 ---@return table sessionIds Array of all cached session IDs
-function playerCache.getAllSessionIds()
+function amb.cache.getAllPlayersSessionIds()
   local sessionIds = {}
 
   for sessionId, _ in pairs(cache) do
@@ -79,16 +77,16 @@ function playerCache.getAllSessionIds()
 end
 
 --- Clear the entire cache (use with caution)
-function playerCache.clear()
+function amb.cache.clearPlayerCache()
   cache = {}
-  ambitionsPrint.warning('Player cache has been cleared')
+  amb.print.warning('Player cache has been cleared')
 end
 
 --- Get cache statistics
 ---@return table stats Cache statistics
-function playerCache.getStats()
+function amb.cache.getPlayerCacheStats()
   local stats = {
-    totalPlayers = playerCache.getCount(),
+    totalPlayers = amb.cache.getPlayerCount,
     onlinePlayers = 0,
     totalCharacters = 0,
     activePlayers = 0
@@ -108,5 +106,3 @@ function playerCache.getStats()
 
   return stats
 end
-
-return playerCache

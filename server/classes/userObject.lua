@@ -1,10 +1,8 @@
-local ambitionsPrint = require('shared.lib.log.print')
-
 --- Modern User Object Class to handle the user data
 ---@param sessionId number The session id of the player
 ---@param playerLicense string The license of the player
 ---@return AmbitionsUserObject userObject The user object instance
-local function CreateAmbitionsUserObject(sessionId, playerLicense)
+function CreateAmbitionsUserObject(sessionId, playerLicense)
 
   ---@class AmbitionsUserObject
   ---@field sessionId number The player's server ID
@@ -157,14 +155,14 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@return boolean success Whether the character was added successfully
   function self:addCharacter(characterObject)
     if not characterObject or not characterObject.getUniqueId then
-      ambitionsPrint.error("Invalid character object provided to addCharacter")
+      amb.print.error("Invalid character object provided to addCharacter")
       return false
     end
 
     local uniqueId = characterObject:getUniqueId()
 
     if self.characters[uniqueId] then
-      ambitionsPrint.error("Character with ID " .. uniqueId .. " already exists")
+      amb.print.error("Character with ID " .. uniqueId .. " already exists")
       return false
     end
 
@@ -214,5 +212,3 @@ local function CreateAmbitionsUserObject(sessionId, playerLicense)
 
   return self
 end
-
-return CreateAmbitionsUserObject

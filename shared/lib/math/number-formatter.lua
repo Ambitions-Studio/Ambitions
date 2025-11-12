@@ -42,12 +42,10 @@ local function toValidNumber(value)
   return nil
 end
 
-local ambitionsNumberFormatter = {}
-
 --- Format a number with space-separated digit groups
 ---@param number number|string The number to format
 ---@return string formatted The formatted number string
-function ambitionsNumberFormatter.format(number)
+function amb.math.formatNumber(number)
   local validNumber = toValidNumber(number)
 
   if not validNumber then
@@ -90,9 +88,9 @@ end
 ---@param number number|string The number to format
 ---@param currencySymbol? string The currency symbol to append, defaults to "$"
 ---@return string formatted The formatted currency string
-function ambitionsNumberFormatter.currency(number, currencySymbol)
+function amb.math.formatCurrency(number, currencySymbol)
   currencySymbol = currencySymbol or "$"
-  local formatted = ambitionsNumberFormatter.format(number)
+  local formatted = amb.math.formatNumber(number)
 
   return formatted .. " " .. currencySymbol
 end
@@ -101,7 +99,7 @@ end
 ---@param number number|string The number to format
 ---@param separator? string The separator to use, defaults to space
 ---@return string formatted The formatted number string
-function ambitionsNumberFormatter.withSeparator(number, separator)
+function amb.math.formatNumberWithSeparator(number, separator)
   separator = separator or SPACE_SEPARATOR
   local validNumber = toValidNumber(number)
 
@@ -144,5 +142,3 @@ function ambitionsNumberFormatter.withSeparator(number, separator)
 
   return finalResult
 end
-
-return ambitionsNumberFormatter
