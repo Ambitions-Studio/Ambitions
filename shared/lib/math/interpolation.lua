@@ -59,15 +59,13 @@ local function interpolateTable(from, to, alpha)
   return result
 end
 
-local ambitionsInterpolation = {}
-
 --- Create an interpolation iterator between two values over time
 ---@generic T : number | table | vector2 | vector3 | vector4
 ---@param startValue T The starting value
----@param endValue T The target value  
+---@param endValue T The target value
 ---@param duration number Duration in milliseconds
 ---@return function iterator Iterator returning current value and progress
-function ambitionsInterpolation.create(startValue, endValue, duration)
+function amb.math.createInterpolator(startValue, endValue, duration)
   local startTime = nil
   local progress = 0
 
@@ -83,7 +81,6 @@ function ambitionsInterpolation.create(startValue, endValue, duration)
   end
 
   return function()
-    local FRAME_TIME <const> = 0
 
     if not startTime then
       startTime = GetGameTimer()
@@ -96,7 +93,7 @@ function ambitionsInterpolation.create(startValue, endValue, duration)
       return endValue, 1
     end
 
-    Wait(FRAME_TIME)
+    Wait(0)
 
     return interpolate(startValue, endValue, progress), progress
   end
@@ -108,7 +105,7 @@ end
 ---@param endValue T The target value
 ---@param progress number Progress value between 0 and 1
 ---@return T result The interpolated value
-function ambitionsInterpolation.valueAt(startValue, endValue, progress)
+function amb.math.interpolate(startValue, endValue, progress)
   progress = math.max(0, math.min(1, progress))
 
   local valueType = type(startValue)
@@ -121,5 +118,3 @@ function ambitionsInterpolation.valueAt(startValue, endValue, progress)
     return interpolateVector(startValue, endValue, progress)
   end
 end
-
-return ambitionsInterpolation

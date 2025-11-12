@@ -1,11 +1,9 @@
-local spawnConfig = require('config.spawn')
-
 --- Modern Character Object Class to handle the character data
 ---@param sessionId number The session id of the player
 ---@param uniqueId string The unique identifier for this character
 ---@param data table All character data
 ---@return AmbitionsCharacterObject characterObject The character object instance
-local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
+function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   ---@class AmbitionsCharacterObject
   ---@field sessionId number The session id of the player
@@ -20,7 +18,7 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   local self = {}
   self.sessionId = sessionId
   self.uniqueId = uniqueId
-  self.pedModel = data.pedModel or spawnConfig.defaultModel
+  self.pedModel = data.pedModel or 'mp_m_freemode_01'
   self.position = data.position or {x = 0, y = 0, z = 70, heading = 0}
   self.group = data.group or "user"
   self.isActive = false
@@ -193,5 +191,3 @@ local function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   return self
 end
-
-return CreateAmbitionsCharacterObject
