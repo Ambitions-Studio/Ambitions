@@ -10,3 +10,5 @@ if RESOURCE_NAME == AMBITIONS then return end
 if GetResourceState(AMBITIONS) ~= 'started' then
   error('^1[' .. RESOURCE_NAME .. ']^0 Ambitions must be started before this resource.', 0)
 end
+
+amb = exports[AMBITIONS]:object()

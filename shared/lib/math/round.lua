@@ -2,7 +2,7 @@
 ---@param number number The number to round
 ---@param decimalPlaces? number The number of decimal places to round to
 ---@return number rounded The rounded number
-function ambitionsRound(number, decimalPlaces)
+function amb.math.round(number, decimalPlaces)
   if decimalPlaces then
     local power = 10 ^ decimalPlaces
 
@@ -11,5 +11,3 @@ function ambitionsRound(number, decimalPlaces)
     return math.floor(number + 0.5)
   end
 end
-
-return ambitionsRound

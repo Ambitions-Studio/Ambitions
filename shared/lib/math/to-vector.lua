@@ -62,21 +62,17 @@ local function createVector(components)
   end
 end
 
-local toScalars = require('shared.lib.math.to-scalars')
-
-local ambitionsToVector = {}
-
 --- Convert input to appropriate vector type
 ---@param input string|table The input to convert (string with delimiters or table/array)
 ---@param min? number Minimum allowed value for each component
 ---@param max? number Maximum allowed value for each component
 ---@param round? boolean|number If true, rounds to integers; if number, rounds to that many decimals
 ---@return vector2|vector3|vector4|number result The converted vector or single number
-function ambitionsToVector.convert(input, min, max, round)
+function amb.math.convertToVector(input, min, max, round)
   local inputType = type(input)
 
   if inputType == "string" then
-    local scalars = toScalars.auto(input)
+    local scalars = amb.math.parseScalarsAuto(input)
 
     if #scalars == 0 then
       error("No valid components found in the input string", 2)
@@ -119,8 +115,8 @@ end
 ---@param max? number Maximum allowed value for each component
 ---@param round? boolean|number Rounding option
 ---@return vector2 result The converted vector2
-function ambitionsToVector.toVector2(input, min, max, round)
-  local result = ambitionsToVector.convert(input, min, max, round)
+function amb.math.convertToVector2(input, min, max, round)
+  local result = amb.math.convertToVector(input, min, max, round)
 
   if type(result) == "vector2" then
     return result
@@ -137,8 +133,8 @@ end
 ---@param max? number Maximum allowed value for each component
 ---@param round? boolean|number Rounding option
 ---@return vector3 result The converted vector3
-function ambitionsToVector.toVector3(input, min, max, round)
-  local result = ambitionsToVector.convert(input, min, max, round)
+function amb.math.convertToVector3(input, min, max, round)
+  local result = amb.math.convertToVector(input, min, max, round)
 
   if type(result) == "vector3" then
     return result
@@ -157,8 +153,8 @@ end
 ---@param max? number Maximum allowed value for each component
 ---@param round? boolean|number Rounding option
 ---@return vector4 result The converted vector4
-function ambitionsToVector.toVector4(input, min, max, round)
-  local result = ambitionsToVector.convert(input, min, max, round)
+function amb.math.convertToVector4(input, min, max, round)
+  local result = amb.math.convertToVector(input, min, max, round)
 
   if type(result) == "vector4" then
     return result
@@ -172,5 +168,3 @@ function ambitionsToVector.toVector4(input, min, max, round)
     error("Input does not contain exactly 4 components for vector4", 2)
   end
 end
-
-return ambitionsToVector
