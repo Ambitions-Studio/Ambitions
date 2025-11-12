@@ -70,6 +70,38 @@ local function executeCallbackHandler(handler, ...)
     return true, result
 end
 
+-- GLOBAL pour éviter les enregistrements multiples cross-resource
+if not _registeredResponseEvents then
+    _registeredResponseEvents = {}
+end
+
+local function ensureResponseEventRegistered(resourceName)
+    if _registeredResponseEvents[resourceName] then
+        return
+    end
+
+    _registeredResponseEvents[resourceName] = true
+
+    RegisterNetEvent(('ambitions:callback:response:%s'):format(resourceName), function(requestId, ...)
+        local pendingRequest = clientCallbacks.pendingRequests[requestId]
+
+        if not pendingRequest then
+            return
+        end
+
+        clientCallbacks.pendingRequests[requestId] = nil
+
+        local args = {...}
+        if args[1] == 'callback_not_found' then
+            amb.print.error('Server callback not found:', pendingRequest.callbackName)
+
+            return
+        end
+
+        pendingRequest.responseHandler(...)
+    end)
+end
+
 --- Register a client callback handler
 ---@param callbackName string The callback identifier
 ---@param handler function The function to execute when called
@@ -178,37 +210,5 @@ RegisterNetEvent(CLIENT_EVENTS.INCOMING_CALL, function(callbackName, requestingR
     local success, result = executeCallbackHandler(handler, ...)
     TriggerServerEvent(CLIENT_EVENTS.RESPONSE, requestingResource, requestId, success, result)
 end)
-
--- GLOBAL pour éviter les enregistrements multiples cross-resource
-if not _registeredResponseEvents then
-    _registeredResponseEvents = {}
-end
-
-local function ensureResponseEventRegistered(resourceName)
-    if _registeredResponseEvents[resourceName] then
-        return
-    end
-
-    _registeredResponseEvents[resourceName] = true
-
-    RegisterNetEvent(('ambitions:callback:response:%s'):format(resourceName), function(requestId, ...)
-        local pendingRequest = clientCallbacks.pendingRequests[requestId]
-
-        if not pendingRequest then
-            return
-        end
-
-        clientCallbacks.pendingRequests[requestId] = nil
-
-        local args = {...}
-        if args[1] == 'callback_not_found' then
-            amb.print.error('Server callback not found:', pendingRequest.callbackName)
-
-            return
-        end
-
-        pendingRequest.responseHandler(...)
-    end)
-end
 
 ensureResponseEventRegistered(getResourceContext())
