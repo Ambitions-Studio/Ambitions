@@ -153,20 +153,24 @@ function amb.triggerClientCallback(callbackName, playerId, options, responseHand
     local requestId = generateServerRequestId(callbackName, playerId)
     local resourceName = getResourceContext()
 
-    serverCallbacks.pendingRequests[requestId] = {
+    local requestData = {
         callbackName = callbackName,
         playerId = playerId,
         responseHandler = responseHandler,
         createdAt = GetGameTimer()
     }
 
+    serverCallbacks.pendingRequests[requestId] = requestData
+    storePendingRequest(requestId, requestData, 'server')
+
     TriggerClientEvent('ambitions:callback:validate', playerId, callbackName, resourceName, requestId)
     TriggerClientEvent('ambitions:callback:client:call', playerId, callbackName, resourceName, requestId, ...)
 
     SetTimeout(callOptions.timeout, function()
-        local pendingRequest = serverCallbacks.pendingRequests[requestId]
+        local pendingRequest = getPendingRequest(requestId, 'server')
 
         if pendingRequest then
+            removePendingRequest(requestId, 'server')
             serverCallbacks.pendingRequests[requestId] = nil
             amb.print.warning('Client callback request timed out:', callbackName, 'for player', playerId, 'after', callOptions.timeout, 'ms')
         end
@@ -198,7 +202,7 @@ RegisterNetEvent(SERVER_EVENTS.INCOMING_CALL, function(callbackName, requestingR
 end)
 
 RegisterNetEvent('ambitions:callback:client:response', function(requestingResource, requestId, ...)
-    local pendingRequest = serverCallbacks.pendingRequests[requestId]
+    local pendingRequest = getPendingRequest(requestId, 'server')
 
     if not pendingRequest then
         amb.print.warning('Received response for unknown request:', requestId)
@@ -206,6 +210,7 @@ RegisterNetEvent('ambitions:callback:client:response', function(requestingResour
         return
     end
 
+    removePendingRequest(requestId, 'server')
     serverCallbacks.pendingRequests[requestId] = nil
 
     local args = {...}

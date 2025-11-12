@@ -6,6 +6,12 @@ local globalCallbackHandlers = {
     client = {}
 }
 
+--- GLOBAL PENDING REQUESTS (pour cross-resource)
+local globalPendingRequests = {
+    server = {},
+    client = {}
+}
+
 --- Constants for the callback system
 local CALLBACK_EVENTS <const> = {
     REGISTER = 'ambitions:callback:register',
@@ -148,6 +154,29 @@ end
 ---@return function|nil handler The callback handler or nil
 function getCallbackHandler(callbackName, side)
     return globalCallbackHandlers[side][callbackName]
+end
+
+--- Store pending request globally
+---@param requestId string The request identifier
+---@param requestData table The request data
+---@param side string 'server' or 'client'
+function storePendingRequest(requestId, requestData, side)
+    globalPendingRequests[side][requestId] = requestData
+end
+
+--- Get pending request from global storage
+---@param requestId string The request identifier
+---@param side string 'server' or 'client'
+---@return table|nil requestData The request data or nil
+function getPendingRequest(requestId, side)
+    return globalPendingRequests[side][requestId]
+end
+
+--- Remove pending request from global storage
+---@param requestId string The request identifier
+---@param side string 'server' or 'client'
+function removePendingRequest(requestId, side)
+    globalPendingRequests[side][requestId] = nil
 end
 
 -- Event handlers for resource lifecycle
