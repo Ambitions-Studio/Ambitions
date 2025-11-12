@@ -1,214 +1,143 @@
--- Client callback state management
-local clientCallbacks = {
-    handlers = {},
-    pendingRequests = {},
-    rateLimiters = {},
-    config = {
-        defaultTimeout = GetConvarInt('ambitions:callbackTimeout', 3000),
-        maxConcurrentCalls = GetConvarInt('ambitions:callbackConcurrency', 50)
-    }
-}
+--[[
+    https://github.com/overextended/ox_lib
 
--- Network event constants
-local CLIENT_EVENTS = {
-    INCOMING_CALL = 'ambitions:callback:client:call',
-    RESPONSE = 'ambitions:callback:client:response'
-}
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
 
---- Get the current resource context
----@return string resourceName Current resource name
-local function getResourceContext()
-    return GetCurrentResourceName()
-end
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
 
---- Generate unique request identifier
----@param callbackName string The callback being called
----@return string requestId Unique request identifier
-local function generateRequestId(callbackName)
-    local timestamp = GetGameTimer()
-    local random = amb.math.randomAlphanumeric(12)
+local pendingCallbacks = {}
+local timers = {}
+local cbEvent = '__ambitions_callback_%s'
+local callbackTimeout = GetConvarInt('ambitions:callbackTimeout', 300000)
 
-    return ('%s:%d:%s'):format(callbackName, timestamp, random)
-end
+RegisterNetEvent(cbEvent:format(GetCurrentResourceName()), function(key, ...)
+    if source == '' then return end
 
---- Check rate limiting for callback triggers
----@param callbackName string The callback being triggered
----@param delayMs number|false Optional delay between calls
----@return boolean allowed Whether the call is allowed
-local function checkRateLimit(callbackName, delayMs)
-    if not delayMs or delayMs <= 0 then
-        return true
-    end
+    local cb = pendingCallbacks[key]
 
-    local now = GetGameTimer()
-    local lastCall = clientCallbacks.rateLimiters[callbackName]
+    if not cb then return end
 
-    if lastCall and (now - lastCall) < delayMs then
-        amb.print.warning('Rate limit exceeded for callback:', callbackName)
-        return false
-    end
+    pendingCallbacks[key] = nil
 
-    clientCallbacks.rateLimiters[callbackName] = now
-
-    return true
-end
-
---- Execute callback handler with error protection
----@param handler function The callback handler function
----@param ... any Arguments to pass to the handler
----@return boolean success Whether execution was successful
----@return any ... Results from the handler
-local function executeCallbackHandler(handler, ...)
-    local success, result = pcall(handler, ...)
-
-    if not success then
-        amb.print.error('Client callback handler failed:', result)
-
-        return false, nil
-    end
-
-    return true, result
-end
-
--- GLOBAL pour éviter les enregistrements multiples cross-resource
-if not _registeredResponseEvents then
-    _registeredResponseEvents = {}
-end
-
-local function ensureResponseEventRegistered(resourceName)
-    if _registeredResponseEvents[resourceName] then
-        return
-    end
-
-    _registeredResponseEvents[resourceName] = true
-
-    RegisterNetEvent(('ambitions:callback:response:%s'):format(resourceName), function(requestId, ...)
-        local pendingRequest = clientCallbacks.pendingRequests[requestId]
-
-        if not pendingRequest then
-            return
-        end
-
-        clientCallbacks.pendingRequests[requestId] = nil
-
-        local args = {...}
-        if args[1] == 'callback_not_found' then
-            amb.print.error('Server callback not found:', pendingRequest.callbackName)
-
-            return
-        end
-
-        pendingRequest.responseHandler(...)
-    end)
-end
-
---- Register a client callback handler
----@param callbackName string The callback identifier
----@param handler function The function to execute when called
----@return boolean success Whether registration was successful
-function amb.registerClientCallback(callbackName, handler)
-    -- Accepter les fonctions ET les tables avec __call metamethod (pour cross-resource)
-    local handlerType = type(handler)
-    local isCallable = handlerType == 'function' or (handlerType == 'table' and getmetatable(handler) and getmetatable(handler).__call)
-
-    if not isCallable then
-        amb.print.error('Callback handler must be a function or callable table, got:', type(handler))
-        return false
-    end
-
-    local resourceName = getResourceContext()
-    local success = registerCallbackHandler(callbackName, resourceName)
-
-    if not success then
-        return false
-    end
-
-    clientCallbacks.handlers[callbackName] = handler
-    storeCallbackHandler(callbackName, handler, 'client')
-    amb.print.debug('Registered client callback:', callbackName)
-
-    return true
-end
-
---- Trigger a server callback and handle response
----@param callbackName string The callback identifier
----@param options table|false Options for the call (delay, timeout) or false for defaults
----@param responseHandler function Function to handle the response
----@param ... any Arguments to send to the server callback
-function amb.triggerServerCallback(callbackName, options, responseHandler, ...)
-    -- Accepter les fonctions ET les tables avec __call metamethod (pour cross-resource)
-    local responseHandlerType = type(responseHandler)
-    local isCallable = responseHandlerType == 'function' or (responseHandlerType == 'table' and getmetatable(responseHandler) and getmetatable(responseHandler).__call)
-
-    if not isCallable then
-        amb.print.error('Response handler must be a function or callable table for callback:', callbackName)
-
-        return
-    end
-
-    local callOptions = {
-        delay = false,
-        timeout = clientCallbacks.config.defaultTimeout
-    }
-
-    if options and type(options) == 'table' then
-        callOptions.delay = options.delay or false
-        callOptions.timeout = options.timeout or clientCallbacks.config.defaultTimeout
-    elseif options and type(options) == 'number' then
-        callOptions.delay = options
-    end
-
-    if not checkRateLimit(callbackName, callOptions.delay) then
-        return
-    end
-
-    local activeCalls = 0
-    for _ in pairs(clientCallbacks.pendingRequests) do
-        activeCalls = activeCalls + 1
-    end
-
-    if activeCalls >= clientCallbacks.config.maxConcurrentCalls then
-        amb.print.warning('Maximum concurrent callback limit reached:', activeCalls)
-
-        return
-    end
-
-    local requestId = generateRequestId(callbackName)
-    local resourceName = getResourceContext()
-
-    ensureResponseEventRegistered(resourceName)
-
-    clientCallbacks.pendingRequests[requestId] = {
-        callbackName = callbackName,
-        responseHandler = responseHandler,
-        createdAt = GetGameTimer()
-    }
-
-    TriggerServerEvent('ambitions:callback:validate', callbackName, resourceName, requestId)
-    TriggerServerEvent('ambitions:callback:server:call', callbackName, resourceName, requestId, ...)
-
-    SetTimeout(callOptions.timeout, function()
-        local pendingRequest = clientCallbacks.pendingRequests[requestId]
-
-        if pendingRequest then
-            clientCallbacks.pendingRequests[requestId] = nil
-            amb.print.warning('Callback request timed out:', callbackName, 'after', callOptions.timeout, 'ms')
-        end
-    end)
-end
-
-RegisterNetEvent(CLIENT_EVENTS.INCOMING_CALL, function(callbackName, requestingResource, requestId, ...)
-    local handler = getCallbackHandler(callbackName, 'client')
-
-    if not handler then
-        amb.print.warning('Received call for unregistered callback:', callbackName)
-        TriggerServerEvent(CLIENT_EVENTS.RESPONSE, requestingResource, requestId, false, 'callback_not_registered')
-
-        return
-    end
-
-    local success, result = executeCallbackHandler(handler, ...)
-    TriggerServerEvent(CLIENT_EVENTS.RESPONSE, requestingResource, requestId, success, result)
+    cb(...)
 end)
 
-ensureResponseEventRegistered(getResourceContext())
+---@param event string
+---@param delay? number | false prevent the event from being called for the given time
+local function eventTimer(event, delay)
+    if delay and type(delay) == 'number' and delay > 0 then
+        local time = GetGameTimer()
+
+        if (timers[event] or 0) > time then
+            return false
+        end
+
+        timers[event] = time + delay
+    end
+
+    return true
+end
+
+---@param _ any
+---@param event string
+---@param delay number | false | nil
+---@param cb function | false
+---@param ... any
+---@return ...
+local function triggerServerCallback(_, event, delay, cb, ...)
+    if not eventTimer(event, delay) then return end
+
+    local key
+
+    repeat
+        key = ('%s:%s'):format(event, math.random(0, 100000))
+    until not pendingCallbacks[key]
+
+    TriggerServerEvent('ambitions:validateCallback', event, GetCurrentResourceName(), key)
+    TriggerServerEvent(cbEvent:format(event), GetCurrentResourceName(), key, ...)
+
+    ---@type promise | false
+    local promise = not cb and promise.new()
+
+    pendingCallbacks[key] = function(response, ...)
+        if response == 'cb_invalid' then
+            response = ("callback '%s' does not exist"):format(event)
+
+            return promise and promise:reject(response) or error(response)
+        end
+
+        response = { response, ... }
+
+        if promise then
+            return promise:resolve(response)
+        end
+
+        if cb then
+            cb(table.unpack(response))
+        end
+    end
+
+    if promise then
+        SetTimeout(callbackTimeout, function() promise:reject(("callback event '%s' timed out"):format(key)) end)
+
+        return table.unpack(Citizen.Await(promise))
+    end
+end
+
+---@overload fun(event: string, delay: number | false, cb: function, ...)
+amb.callback = setmetatable({}, {
+    __call = function(_, event, delay, cb, ...)
+        if not cb then
+            warn(("callback event '%s' does not have a function to callback to and will instead await\nuse amb.callback.await or a regular event to remove this warning"):format(event))
+        else
+            local cbType = type(cb)
+
+            if cbType == 'table' and getmetatable(cb)?.__call then
+                cbType = 'function'
+            end
+
+            assert(cbType == 'function', ("expected argument 3 to have type 'function' (received %s)"):format(cbType))
+        end
+
+        return triggerServerCallback(_, event, delay, cb, ...)
+    end
+})
+
+---@param event string
+---@param delay? number | false prevent the event from being called for the given time.
+---Sends an event to the server and halts the current thread until a response is returned.
+---@diagnostic disable-next-line: duplicate-set-field
+function amb.callback.await(event, delay, ...)
+    return triggerServerCallback(nil, event, delay, false, ...)
+end
+
+local function callbackResponse(success, result, ...)
+    if not success then
+        if result then
+            return amb.print.error(('%s^0\n%s'):format(result, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()) or ''))
+        end
+
+        return false
+    end
+
+    return result, ...
+end
+
+local pcall = pcall
+
+---@param name string
+---@param cb function
+---Registers an event handler and callback function to respond to server requests.
+---@diagnostic disable-next-line: duplicate-set-field
+function amb.callback.register(name, cb)
+    event = cbEvent:format(name)
+
+    SetValidCallback(name, true)
+
+    RegisterNetEvent(event, function(resource, key, ...)
+        TriggerServerEvent(cbEvent:format(resource), key, callbackResponse(pcall(cb, ...)))
+    end)
+end
+
+return amb.callback

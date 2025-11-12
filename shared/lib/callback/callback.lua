@@ -1,174 +1,64 @@
-local resourceCallbacks = {}
+--[[
+    https://github.com/overextended/ox_lib
 
---- GLOBAL CALLBACK STORAGE
-local globalCallbackHandlers = {
-    server = {},
-    client = {}
-}
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
 
---- Constants for the callback system
-local CALLBACK_EVENTS <const> = {
-    REGISTER = 'ambitions:callback:register',
-    UNREGISTER = 'ambitions:callback:unregister',
-    VALIDATE = 'ambitions:callback:validate'
-}
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
 
---- Get current resource context
----@return string resourceName The current resource name
-local function getCurrentResourceContext()
-    return GetInvokingResource() or GetCurrentResourceName()
-end
+local registeredCallbacks = {}
 
---- Initialize callback storage for a resource
----@param resourceName string The resource to initialize
-local function initializeResourceCallbacks(resourceName)
-    if not resourceCallbacks[resourceName] then
-        resourceCallbacks[resourceName] = {
-            registered = {},
-            createdAt = GetGameTimer()
-        }
-        amb.print.debug('Initialized callback storage for resource:', resourceName)
-    end
-end
-
---- Clean up all callbacks for a stopped resource
----@param stoppedResource string The resource that stopped
-local function cleanupResourceCallbacks(stoppedResource)
-    if resourceCallbacks[stoppedResource] then
-        local callbackCount = 0
-        for _ in pairs(resourceCallbacks[stoppedResource].registered) do
-            callbackCount = callbackCount + 1
-        end
-
-        resourceCallbacks[stoppedResource] = nil
-        amb.print.debug('Cleaned up', callbackCount, 'callbacks for stopped resource:', stoppedResource)
-    end
-end
-
---- Register a callback handler for validation
----@param callbackName string The callback identifier
----@param resourceName string The owning resource
----@return boolean success Whether registration was successful
-function registerCallbackHandler(callbackName, resourceName)
-    initializeResourceCallbacks(resourceName)
-
-    for resource, data in pairs(resourceCallbacks) do
-        if resource ~= resourceName and data.registered[callbackName] then
-            amb.print.error('Callback conflict:', callbackName, 'already registered by', resource)
-
-            return false
-        end
-    end
-
-    resourceCallbacks[resourceName].registered[callbackName] = {
-        registeredAt = GetGameTimer(),
-        calls = 0
-    }
-
-    amb.print.debug('Registered callback handler:', callbackName, 'for resource:', resourceName)
-
-    return true
-end
-
---- Unregister a callback handler
----@param callbackName string The callback identifier
----@param resourceName string The owning resource
----@return boolean success Whether unregistration was successful
-function unregisterCallbackHandler(callbackName, resourceName)
-    if resourceCallbacks[resourceName] and resourceCallbacks[resourceName].registered[callbackName] then
-        resourceCallbacks[resourceName].registered[callbackName] = nil
-        amb.print.debug('Unregistered callback handler:', callbackName, 'from resource:', resourceName)
-
-        return true
-    end
-
-    return false
-end
-
---- Validate if a callback exists and is accessible
----@param callbackName string The callback to validate
----@return boolean exists Whether the callback exists
----@return string|nil ownerResource The resource that owns the callback
-function validateCallbackExists(callbackName)
-    for resource, data in pairs(resourceCallbacks) do
-        if data.registered[callbackName] then
-            data.registered[callbackName].calls = data.registered[callbackName].calls + 1
-
-            return true, resource
-        end
-    end
-
-    return false, nil
-end
-
---- Get callback statistics for monitoring
----@return table stats Detailed callback statistics
-function getCallbackStatistics()
-    local stats = {
-        totalResources = 0,
-        totalCallbacks = 0,
-        resourceBreakdown = {}
-    }
-
-    for resource, data in pairs(resourceCallbacks) do
-        local resourceStats = {
-            callbacks = 0,
-            totalCalls = 0,
-            oldestCallback = math.huge,
-            newestCallback = 0
-        }
-
-        for callbackName, callbackData in pairs(data.registered) do
-            resourceStats.callbacks = resourceStats.callbacks + 1
-            resourceStats.totalCalls = resourceStats.totalCalls + callbackData.calls
-            resourceStats.oldestCallback = math.min(resourceStats.oldestCallback, callbackData.registeredAt)
-            resourceStats.newestCallback = math.max(resourceStats.newestCallback, callbackData.registeredAt)
-        end
-
-        stats.totalResources = stats.totalResources + 1
-        stats.totalCallbacks = stats.totalCallbacks + resourceStats.callbacks
-        stats.resourceBreakdown[resource] = resourceStats
-    end
-
-    return stats
-end
-
---- Store callback handler globally
----@param callbackName string The callback identifier
----@param handler function The callback handler
----@param side string 'server' or 'client'
-function storeCallbackHandler(callbackName, handler, side)
-    globalCallbackHandlers[side][callbackName] = handler
-    amb.print.debug('[GLOBAL] Stored', side, 'callback handler:', callbackName)
-end
-
---- Get callback handler from global storage (dans Ambitions)
----@param callbackName string The callback identifier
----@param side string 'server' or 'client'
----@return function|nil handler The callback handler or nil
-function getCallbackHandler(callbackName, side)
-    return globalCallbackHandlers[side][callbackName]
-end
-
--- Event handlers for resource lifecycle
 AddEventHandler('onResourceStop', function(resourceName)
-    local currentResource = getCurrentResourceContext()
+    if GetCurrentResourceName() == resourceName then return end
 
-    if currentResource ~= resourceName then
-        cleanupResourceCallbacks(resourceName)
+    for callbackName, resource in pairs(registeredCallbacks) do
+        if resource == resourceName then
+            registeredCallbacks[callbackName] = nil
+        end
     end
 end)
 
--- Network event for callback validation
-RegisterNetEvent(CALLBACK_EVENTS.VALIDATE, function(callbackName, requestingResource, validationToken)
-    local exists, ownerResource = validateCallbackExists(callbackName)
-    local responseEvent = ('ambitions:callback:response:%s'):format(requestingResource)
+---For internal use only.
+---Sets a callback event as registered to a specific resource, preventing it from
+---being overwritten. Any unknown callbacks will return an error to the caller.
+---@param callbackName string
+---@param isValid boolean
+function SetValidCallback(callbackName, isValid)
+    local resourceName = GetInvokingResource() or GetCurrentResourceName()
+    local callbackResource = registeredCallbacks[callbackName]
 
-    if not exists then
-        if IsDuplicityVersion() then
-            TriggerClientEvent(responseEvent, source, validationToken, 'callback_not_found')
-        else
-            TriggerServerEvent(responseEvent, validationToken, 'callback_not_found')
+    if callbackResource then
+        if not isValid then
+            callbackResource[callbackName] = nil
+            return
         end
+
+        if callbackResource == resourceName then return end
+
+        local errMessage = ("^1resource '%s' attempted to overwrite callback '%s' owned by resource '%s'^0"):format(resourceName, callbackName, callbackResource)
+
+        return amb.print.error(('%s^0\n%s'):format(errMessage, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()) or ''))
     end
+
+    amb.print.warning(("set valid callback '%s' for resource '%s'"):format(callbackName, resourceName))
+
+    registeredCallbacks[callbackName] = resourceName
+end
+
+function IsCallbackValid(callbackName)
+    return registeredCallbacks[callbackName] == GetInvokingResource() or GetCurrentResourceName()
+end
+
+local cbEvent = '__ambitions_callback_%s'
+
+RegisterNetEvent('ambitions:validateCallback', function(callbackName, invokingResource, key)
+    if registeredCallbacks[callbackName] then return end
+
+    local event = cbEvent:format(invokingResource)
+
+    if GetGameName() == 'fxserver' then
+        return TriggerClientEvent(event, source, key, 'cb_invalid')
+    end
+
+    TriggerServerEvent(event, key, 'cb_invalid')
 end)
