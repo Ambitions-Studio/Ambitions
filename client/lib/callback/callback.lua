@@ -144,6 +144,8 @@ function amb.triggerServerCallback(callbackName, options, responseHandler, ...)
     local requestId = generateRequestId(callbackName)
     local resourceName = getResourceContext()
 
+    ensureResponseEventRegistered(resourceName)
+
     clientCallbacks.pendingRequests[requestId] = {
         callbackName = callbackName,
         responseHandler = responseHandler,
@@ -177,23 +179,36 @@ RegisterNetEvent(CLIENT_EVENTS.INCOMING_CALL, function(callbackName, requestingR
     TriggerServerEvent(CLIENT_EVENTS.RESPONSE, requestingResource, requestId, success, result)
 end)
 
-RegisterNetEvent(('ambitions:callback:response:%s'):format(getResourceContext()), function(requestId, ...)
-    local pendingRequest = clientCallbacks.pendingRequests[requestId]
+-- GLOBAL pour éviter les enregistrements multiples cross-resource
+if not _registeredResponseEvents then
+    _registeredResponseEvents = {}
+end
 
-    if not pendingRequest then
-        amb.print.warning('Received response for unknown request:', requestId)
-
+local function ensureResponseEventRegistered(resourceName)
+    if _registeredResponseEvents[resourceName] then
         return
     end
 
-    clientCallbacks.pendingRequests[requestId] = nil
+    _registeredResponseEvents[resourceName] = true
 
-    local args = {...}
-    if args[1] == 'callback_not_found' then
-        amb.print.error('Server callback not found:', pendingRequest.callbackName)
+    RegisterNetEvent(('ambitions:callback:response:%s'):format(resourceName), function(requestId, ...)
+        local pendingRequest = clientCallbacks.pendingRequests[requestId]
 
-        return
-    end
+        if not pendingRequest then
+            return
+        end
 
-    pendingRequest.responseHandler(...)
-end)
+        clientCallbacks.pendingRequests[requestId] = nil
+
+        local args = {...}
+        if args[1] == 'callback_not_found' then
+            amb.print.error('Server callback not found:', pendingRequest.callbackName)
+
+            return
+        end
+
+        pendingRequest.responseHandler(...)
+    end)
+end
+
+ensureResponseEventRegistered(getResourceContext())
