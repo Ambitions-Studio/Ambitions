@@ -6,7 +6,8 @@
     Copyright © 2025 Linden <https://github.com/thelindat>
 ]]
 
-local registeredCallbacks = {}
+amb.registeredCallbacks = amb.registeredCallbacks or {}
+local registeredCallbacks = amb.registeredCallbacks
 
 AddEventHandler('onResourceStop', function(resourceName)
     if GetCurrentResourceName() == resourceName then return end
@@ -40,7 +41,7 @@ function SetValidCallback(callbackName, isValid)
         return amb.print.error(('%s^0\n%s'):format(errMessage, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()) or ''))
     end
 
-    amb.print.warning(("set valid callback '%s' for resource '%s'"):format(callbackName, resourceName))
+    amb.print.debug(("set valid callback '%s' for resource '%s'"):format(callbackName, resourceName))
 
     registeredCallbacks[callbackName] = resourceName
 end
