@@ -14,24 +14,43 @@ name 'Ambitions'
 
 lua54 'yes'
 
-shared_script 'importation.lua'
+shared_scripts {
+    'shared/init.lua',
+    'shared/lib/callback/callback.lua'
+}
+
+server_script 'server/lib/callback/callback.lua'
+client_script 'client/lib/callback/callback.lua'
+
+shared_script {
+    'shared/lib/**/*.lua',
+}
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
 
-    'server/init.lua',
+    'config/migration.lua',
+
+    'server/database/schema.lua',
+    'server/database/sqlGenerator.lua',
+    'server/database/connectionValidator.lua',
+    'server/database/migration.lua',
     'server/database/autoMigration.lua',
-    'server/modules/core/savePlayer.lua',
+
+    'server/classes/*.lua',
+
+    'server/lib/**/*.lua',
+
+    'server/init.lua',
 }
 
-client_scripts {}
+client_scripts {
+    'client/lib/**/*.lua',
+    'client/init.lua'
+}
 
 files {
-    'verification.lua',
-    'importation.lua',
-    'client/**/*.lua',
-    'shared/**/*.lua',
-    'config/*.lua'
+    'init.lua',
 }
 
 dependencies {

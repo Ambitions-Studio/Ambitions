@@ -67,23 +67,21 @@ local function print_log(level, ...)
     print(("%s[%s]^7: %s"):format(lvl.color, lvl.label, table.concat(out, ' ')))
 end
 
-local log = {}
-
 --- Print an info log message.
 ---@vararg any The message(s) or variable(s) to print.
-function log.info(...)
+function amb.print.info(...)
     print_log('info', ...)
 end
 
 --- Print a success log message.
 ---@vararg any The message(s) or variable(s) to print.
-function log.success(...)
+function amb.print.success(...)
     print_log('success', ...)
 end
 
 --- Print an error log message and throw a Lua error with stack trace.
 ---@vararg any The message(s) or variable(s) to print.
-function log.error(...)
+function amb.print.error(...)
     local args = { ... }
     local out = {}
 
@@ -101,14 +99,12 @@ end
 
 --- Print a warning log message.
 ---@vararg any The message(s) or variable(s) to print.
-function log.warning(...)
+function amb.print.warning(...)
     print_log('warning', ...)
 end
 
 --- Print a debug log message.
 ---@vararg any The message(s) or variable(s) to print.
-function log.debug(...)
+function amb.print.debug(...)
     print_log('debug', ...)
 end
-
-return log

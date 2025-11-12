@@ -71,13 +71,11 @@ local function validateScalarCount(scalars, expectedCount)
   return #scalars == expectedCount
 end
 
-local ambitionsToScalars = {}
-
 --- Parse string to array of scalars with specific separator
 ---@param input string The input string to parse
 ---@param separator string The separator character to use
 ---@return number[] scalars Array of parsed scalar values
-function ambitionsToScalars.parse(input, separator)
+function amb.math.parseScalars(input, separator)
   if type(input) ~= "string" then
     return {}
   end
@@ -88,28 +86,28 @@ end
 --- Parse comma-delimited string to scalars
 ---@param input string The input string (e.g., "1,2,3")
 ---@return number[] scalars Array of parsed scalar values
-function ambitionsToScalars.fromComma(input)
-  return ambitionsToScalars.parse(input, ",")
+function amb.math.parseScalarsFromComma(input)
+  return amb.math.parseScalars(input, ",")
 end
 
 --- Parse space-delimited string to scalars
 ---@param input string The input string (e.g., "1 2 3")
 ---@return number[] scalars Array of parsed scalar values
-function ambitionsToScalars.fromSpace(input)
-  return ambitionsToScalars.parse(input, " ")
+function amb.math.parseScalarsFromSpace(input)
+  return amb.math.parseScalars(input, " ")
 end
 
 --- Parse semicolon-delimited string to scalars
 ---@param input string The input string (e.g., "1;2;3")
 ---@return number[] scalars Array of parsed scalar values
-function ambitionsToScalars.fromSemicolon(input)
-  return ambitionsToScalars.parse(input, ";")
+function amb.math.parseScalarsFromSemicolon(input)
+  return amb.math.parseScalars(input, ";")
 end
 
 --- Parse string to scalars with automatic separator detection
 ---@param input string The input string to parse
 ---@return number[] scalars Array of parsed scalar values
-function ambitionsToScalars.auto(input)
+function amb.math.parseScalarsAuto(input)
   if type(input) ~= "string" then
     return {}
   end
@@ -128,8 +126,8 @@ end
 --- Parse string to RGB color values (0-255)
 ---@param input string The input string (e.g., "255,128,64")
 ---@return number|nil red, number|nil green, number|nil blue RGB values or nil if invalid
-function ambitionsToScalars.toRGB(input)
-  local scalars = ambitionsToScalars.auto(input)
+function amb.math.parseScalarsToRGB(input)
+  local scalars = amb.math.parseScalarsAuto(input)
 
   if validateScalarCount(scalars, 3) then
     local r = math.max(0, math.min(255, math.floor(scalars[1])))
@@ -145,8 +143,8 @@ end
 --- Parse string to RGBA color values (0-255)
 ---@param input string The input string (e.g., "255,128,64,128")
 ---@return number|nil red, number|nil green, number|nil blue, number|nil alpha RGBA values or nil if invalid
-function ambitionsToScalars.toRGBA(input)
-  local scalars = ambitionsToScalars.auto(input)
+function amb.math.parseScalarsToRGBA(input)
+  local scalars = amb.math.parseScalarsAuto(input)
 
   if validateScalarCount(scalars, 4) then
     local r = math.max(0, math.min(255, math.floor(scalars[1])))
@@ -163,8 +161,8 @@ end
 --- Get count of scalars that would be parsed from input
 ---@param input string The input string to analyze
 ---@return number count Number of scalars that would be parsed
-function ambitionsToScalars.count(input)
-  local scalars = ambitionsToScalars.auto(input)
+function amb.math.countScalars(input)
+  local scalars = amb.math.parseScalarsAuto(input)
 
   return #scalars
 end
@@ -173,8 +171,6 @@ end
 ---@param input string The input string to validate
 ---@param expectedCount number Expected number of scalars
 ---@return boolean isValid True if input can be parsed to expected count
-function ambitionsToScalars.validate(input, expectedCount)
-  return ambitionsToScalars.count(input) == expectedCount
+function amb.math.validateScalars(input, expectedCount)
+  return amb.math.countScalars(input) == expectedCount
 end
-
-return ambitionsToScalars

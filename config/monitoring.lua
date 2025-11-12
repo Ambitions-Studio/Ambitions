@@ -1,4 +1,4 @@
-return {
+monitoringConfig = {
   enabled = true,
 
   serverName = GetConvar("sv_hostname", "Server Using Ambitions"),
