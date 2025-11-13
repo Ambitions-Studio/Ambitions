@@ -43,7 +43,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Trigger an event for the user
   ---@param eventName string The name of the event to trigger
   ---@param ... any Additional arguments to pass to the event
-  function self:triggerEvent(eventName, ...)
+  function self.triggerEvent(eventName, ...)
     assert(type(eventName) == 'string', 'eventName must be a string')
 
     TriggerClientEvent(eventName, self.sessionId, self, ...)
@@ -51,13 +51,13 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   --- Get user source / session ID
   ---@return number sessionId The user's session ID
-  function self:getSessionId()
+  function self.getSessionId()
     return self.sessionId
   end
 
   --- Get character's unique ID
   ---@return string uniqueId The character's unique ID
-  function self:getUniqueId()
+  function self.getUniqueId()
     return self.uniqueId
   end
 
@@ -65,8 +65,8 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@param isVector boolean Whether to return coords formatted as a vector or not
   ---@param hasHeading boolean Is heading needed or not
   ---@return vector4 | vector3 | table position Return coords as a vector or table
-  function self:getPosition(isVector, hasHeading)
-    local player <const> = GetPlayerPed(self:getSessionId())
+  function self.getPosition(isVector, hasHeading)
+    local player <const> = GetPlayerPed(self.getSessionId())
     local playerPosition <const> = GetEntityCoords(player)
     local playerHeading <const> = GetEntityHeading(player)
     local coords = { x = playerPosition.x, y = playerPosition.y, z = playerPosition.z }
@@ -85,61 +85,61 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   --- Check if character is active
   ---@return boolean active Whether the character is active
-  function self:isCharacterActive()
+  function self.isCharacterActive()
     return self.isActive
   end
 
   --- Get character's ped model
   ---@return string pedModel The character's ped model
-  function self:getPedModel()
+  function self.getPedModel()
     return self.pedModel
   end
 
   --- Get character's group
   ---@return string group The character's permission group
-  function self:getGroup()
+  function self.getGroup()
     return self.group
   end
 
   --- Get character's last played timestamp
   ---@return number lastPlayed Timestamp of last play session
-  function self:getLastPlayed()
+  function self.getLastPlayed()
     return self.lastPlayed
   end
 
   --- Get character's creation timestamp
   ---@return number | nil createdAt Character creation timestamp
-  function self:getCreatedAt()
+  function self.getCreatedAt()
     return self.createdAt
   end
 
   --- Get character's first name
   ---@return string firstname Character's first name
-  function self:getFirstname()
+  function self.getFirstname()
     return self.firstname
   end
 
   --- Get character's last name
   ---@return string lastname Character's last name
-  function self:getLastname()
+  function self.getLastname()
     return self.lastname
   end
 
   --- Get character's full name
   ---@return string fullname Character's full name (firstname lastname)
-  function self:getFullName()
+  function self.getFullName()
     return self.firstname .. " " .. self.lastname
   end
 
   --- Get character's date of birth
   ---@return string dateofbirth Character's date of birth (DD/MM/YYYY)
-  function self:getDateOfBirth()
+  function self.getDateOfBirth()
     return self.dateofbirth
   end
 
   --- Get character's age calculated from date of birth
   ---@return number | nil age Character's age in years or nil if invalid date
-  function self:getAge()
+  function self.getAge()
     if not self.dateofbirth or self.dateofbirth == "" then
       return nil
     end
@@ -166,31 +166,31 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   --- Get character's sex
   ---@return string sex Character's sex (M/F)
-  function self:getSex()
+  function self.getSex()
     return self.sex
   end
 
   --- Get character's nationality
   ---@return string nationality Character's nationality
-  function self:getNationality()
+  function self.getNationality()
     return self.nationality
   end
 
   --- Get character's height
   ---@return number height Character's height in cm
-  function self:getHeight()
+  function self.getHeight()
     return self.height
   end
 
   --- Get character's appearance data
   ---@return string | nil appearance Character's appearance data
-  function self:getAppearance()
+  function self.getAppearance()
     return self.appearance
   end
 
   --- Get character's playtime with real-time update using native
   ---@return number playtime Character playtime in seconds
-  function self:getPlaytime()
+  function self.getPlaytime()
     if self.isActive then
       local sessionTime = GetPlayerTimeOnline(self.sessionId) / 1000
       return self.playtime + sessionTime
@@ -202,8 +202,8 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's position
   ---@param position vector4 | vector3 | table The position to set
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setPosition(position)
-    local player <const> = GetPlayerPed(self:getSessionId())
+  function self.setPosition(position)
+    local player <const> = GetPlayerPed(self.getSessionId())
 
     SetEntityCoords(player, position.x, position.y, position.z, false, false, false, false)
     SetEntityHeading(player, position.w or position.heading or 0.0)
@@ -216,14 +216,14 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character as active/inactive
   ---@param status boolean Active status
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setActive(status)
+  function self.setActive(status)
     if not status and self.isActive then
-      self:updatePlaytime()
+      self.updatePlaytime()
     end
     
     self.isActive = status
     if status then
-      self:updateLastPlayed()
+      self.updateLastPlayed()
     end
 
     return self
@@ -232,7 +232,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's ped model
   ---@param model string The model to set
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setPedModel(model)
+  function self.setPedModel(model)
     if not model or type(model) ~= "string" or model == "" then
       amb.print.error("Invalid ped model provided to setPedModel")
       return self
@@ -246,7 +246,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's group
   ---@param group string The group to set
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setGroup(group)
+  function self.setGroup(group)
     self.group = group
 
     return self
@@ -255,7 +255,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's first name
   ---@param firstname string The first name to set
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setFirstname(firstname)
+  function self.setFirstname(firstname)
     self.firstname = firstname or ""
 
     return self
@@ -264,7 +264,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's last name
   ---@param lastname string The last name to set
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setLastname(lastname)
+  function self.setLastname(lastname)
     self.lastname = lastname or ""
 
     return self
@@ -273,7 +273,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's date of birth
   ---@param dateofbirth string The date of birth (DD/MM/YYYY)
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setDateOfBirth(dateofbirth)
+  function self.setDateOfBirth(dateofbirth)
     self.dateofbirth = dateofbirth or ""
 
     return self
@@ -282,7 +282,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's sex
   ---@param sex string The sex (M/F)
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setSex(sex)
+  function self.setSex(sex)
     self.sex = sex or "M"
 
     return self
@@ -291,7 +291,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's nationality
   ---@param nationality string The nationality
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setNationality(nationality)
+  function self.setNationality(nationality)
     self.nationality = nationality or ""
 
     return self
@@ -300,7 +300,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's height
   ---@param height number The height in cm
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setHeight(height)
+  function self.setHeight(height)
     self.height = height or 175
 
     return self
@@ -309,7 +309,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Set character's appearance data
   ---@param appearance string | nil The appearance data
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:setAppearance(appearance)
+  function self.setAppearance(appearance)
     self.appearance = appearance
 
     return self
@@ -317,7 +317,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   --- Update last played timestamp
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:updateLastPlayed()
+  function self.updateLastPlayed()
     self.lastPlayed = os.time()
 
     return self
@@ -325,7 +325,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   --- Update playtime with current session time
   ---@return AmbitionsCharacterObject self For method chaining
-  function self:updatePlaytime()
+  function self.updatePlaytime()
     if self.isActive then
       local sessionTime = GetPlayerTimeOnline(self.sessionId) / 1000
       self.playtime = self.playtime + sessionTime
@@ -336,13 +336,13 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
 
   --- Save character data to database
   ---@return boolean success Whether the save was successful
-  function self:save()
+  function self.save()
     if self.isActive then
-      self:updatePlaytime()
+      self.updatePlaytime()
     end
     
     -- TODO: Implement database save logic
-    self:updateLastPlayed()
+    self.updateLastPlayed()
 
     return true
   end

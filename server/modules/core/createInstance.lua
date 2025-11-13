@@ -21,7 +21,7 @@ RegisterNetEvent('ambitions:server:insertUserIntoCache', function(sessionId, pla
         return
     end
 
-    userObject:setIdentifiers(playerIdentifiers)
+    userObject.setIdentifiers(playerIdentifiers)
 
     local success = amb.cache.addPlayer(sessionId, userObject)
 
@@ -65,7 +65,7 @@ RegisterNetEvent('ambitions:server:insertCharacterIntoCache', function(sessionId
         return
     end
 
-    local success = userObject:addCharacter(characterObject)
+    local success = userObject.addCharacter(characterObject)
 
     if not success then
         amb.print.error('Failed to add character ' .. uniqueId .. ' to user cache for session ' .. sessionId)
@@ -73,8 +73,8 @@ RegisterNetEvent('ambitions:server:insertCharacterIntoCache', function(sessionId
         return
     end
 
-    userObject:setCurrentCharacter(uniqueId)
-    userObject.currentCharacter:setActive(true)
+    userObject.setCurrentCharacter(uniqueId)
+    userObject.currentCharacter.setActive(true)
 
     -- Debug prints
     amb.print.success('Character inserted into cache for session ' .. sessionId .. ' with uniqueId ' .. uniqueId)
@@ -110,7 +110,7 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
         return
     end
 
-    userObject:setIdentifiers(playerIdentifiers)
+    userObject.setIdentifiers(playerIdentifiers)
 
     local success = amb.cache.addPlayer(sessionId, userObject)
 
@@ -157,7 +157,7 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
         if not characterObject then
             amb.print.error('Failed to create character object for uniqueId ' .. char.unique_id)
         else
-            local addSuccess = userObject:addCharacter(characterObject)
+            local addSuccess = userObject.addCharacter(characterObject)
 
             if not addSuccess then
                 amb.print.error('Failed to add character ' .. char.unique_id .. ' to user cache for session ' .. sessionId)
@@ -171,7 +171,7 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
     amb.print.success('All characters loaded into cache for session ' .. sessionId)
     amb.print.info('User Object:')
     amb.print.info(userObject)
-    amb.print.info('Total characters loaded: ' .. userObject:getCharacterCount())
+    amb.print.info('Total characters loaded: ' .. userObject.getCharacterCount())
     amb.print.info('Cache Stats:')
     amb.print.info(amb.cache.getPlayerCacheStats())
 end)

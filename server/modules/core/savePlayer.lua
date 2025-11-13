@@ -8,8 +8,8 @@ local function SaveUserData(license, userObject)
     return false
   end
 
-  local totalPlaytime = userObject:getTotalPlaytime()
-  local lastPlayedCharacter = userObject:getLastPlayedCharacter()
+  local totalPlaytime = userObject.getTotalPlaytime()
+  local lastPlayedCharacter = userObject.getLastPlayedCharacter()
 
   local success = MySQL.update.await(
     'UPDATE users SET last_seen = NOW(), total_playtime = ?, last_played_character = ? WHERE license = ?',
@@ -36,17 +36,17 @@ local function SaveCharacterData(characterObject)
   end
 
   -- Extract all character data from cache
-  local uniqueId = characterObject:getUniqueId()
-  local firstname = characterObject:getFirstname()
-  local lastname = characterObject:getLastname()
-  local dateofbirth = characterObject:getDateOfBirth()
-  local sex = characterObject:getSex()
-  local nationality = characterObject:getNationality()
-  local height = characterObject:getHeight()
-  local appearance = characterObject:getAppearance()
-  local group = characterObject:getGroup()
-  local pedModel = characterObject:getPedModel()
-  local playtime = characterObject:getPlaytime()
+  local uniqueId = characterObject.getUniqueId()
+  local firstname = characterObject.getFirstname()
+  local lastname = characterObject.getLastname()
+  local dateofbirth = characterObject.getDateOfBirth()
+  local sex = characterObject.getSex()
+  local nationality = characterObject.getNationality()
+  local height = characterObject.getHeight()
+  local appearance = characterObject.getAppearance()
+  local group = characterObject.getGroup()
+  local pedModel = characterObject.getPedModel()
+  local playtime = characterObject.getPlaytime()
 
   local storedPosition = characterObject.position
 
@@ -107,7 +107,7 @@ end
 ---@param playerObject AmbitionsUserObject The player object
 ---@return boolean success Whether the cache update was successful
 local function UpdateCacheBeforeSave(sessionId, playerObject)
-  local CHARACTER_OBJECT = playerObject:getCurrentCharacter()
+  local CHARACTER_OBJECT = playerObject.getCurrentCharacter()
 
   if not CHARACTER_OBJECT then
     amb.print.error('No character object to update cache for player: ', sessionId)
@@ -132,13 +132,13 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
   end
 
   -- Update playtime
-  CHARACTER_OBJECT:updatePlaytime()
+  CHARACTER_OBJECT.updatePlaytime()
 
   -- Update last seen
-  playerObject:updateLastSeen()
+  playerObject.updateLastSeen()
 
   -- Update last played character
-  local currentCharacterUniqueId = CHARACTER_OBJECT:getUniqueId()
+  local currentCharacterUniqueId = CHARACTER_OBJECT.getUniqueId()
   if currentCharacterUniqueId then
     playerObject.lastPlayedCharacter = currentCharacterUniqueId
   end
@@ -150,8 +150,8 @@ end
 ---@param sessionId number The session ID of the player
 ---@param playerObject AmbitionsUserObject The player object to save
 local function SavePlayerDropped(sessionId, playerObject)
-  local CHARACTER_OBJECT <const> = playerObject:getCurrentCharacter()
-  local PLAYER_LICENSE <const> = playerObject:getIdentifier('license')
+  local CHARACTER_OBJECT <const> = playerObject.getCurrentCharacter()
+  local PLAYER_LICENSE <const> = playerObject.getIdentifier('license')
 
   if not CHARACTER_OBJECT then
     amb.print.error('Player ', GetPlayerName(sessionId), ' did not have a character object and therefore could not be saved.')
