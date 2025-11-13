@@ -14,6 +14,7 @@ function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@field lastSeen number Timestamp of last activity
   ---@field lastPlayedCharacter string | nil The unique ID of the last played character
   ---@field totalPlaytime number Total playtime across all characters in seconds
+  ---@field createdAt number Timestamp of when the user was created
   local self = {}
   self.sessionId = sessionId
   self.license = playerLicense
@@ -24,17 +25,18 @@ function CreateAmbitionsUserObject(sessionId, playerLicense)
   self.lastSeen = os.time()
   self.lastPlayedCharacter = nil
   self.totalPlaytime = 0
-
-  --- Get user license
-  ---@return string license The user's license
-  function self:getLicense()
-    return self.license
-  end
+  self.createdAt = nil
 
   --- Get user source / session ID
   ---@return number sessionId The user's session ID
   function self:getSessionId()
     return self.sessionId
+  end
+
+  --- Get user license
+  ---@return string license The user's license
+  function self:getLicense()
+    return self.license
   end
 
   --- Get all identifiers
@@ -99,19 +101,16 @@ function CreateAmbitionsUserObject(sessionId, playerLicense)
     return self.lastPlayedCharacter
   end
 
+  --- Get user creation timestamp
+  ---@return number | nil createdAt Timestamp of when the user was created
+  function self:getCreatedAt()
+    return self.createdAt
+  end
+
   --- Get total playtime across all characters
-  ---@return number totalPlaytime Total playtime in seconds calculated from all characters
+  ---@return number totalPlaytime Total playtime in seconds
   function self:getTotalPlaytime()
-    local total = 0
-    for _, character in pairs(self.characters) do
-      if character.getPlaytime then
-        total = total + character:getPlaytime()
-      end
-    end
-
-    self.totalPlaytime = total
-
-    return total
+    return self.totalPlaytime
   end
 
   --- Set all identifiers for this user
@@ -125,16 +124,17 @@ function CreateAmbitionsUserObject(sessionId, playerLicense)
 
   --- Set the active character for the user
   ---@param uniqueId string The unique ID of the character to set as active
-  ---@return boolean success Whether the operation was successful
+  ---@return AmbitionsUserObject self For method chaining
   function self:setCurrentCharacter(uniqueId)
     if not uniqueId or not self.characters[uniqueId] then
-      return false
+      amb.print.error("Cannot set current character: Invalid uniqueId or character not found")
+      return self
     end
 
     self.currentCharacter = self.characters[uniqueId]
     self.lastPlayedCharacter = uniqueId
 
-    return true
+    return self
   end
 
   --- Set online status
@@ -193,6 +193,21 @@ function CreateAmbitionsUserObject(sessionId, playerLicense)
   ---@return AmbitionsUserObject self For method chaining
   function self:updateLastSeen()
     self.lastSeen = os.time()
+
+    return self
+  end
+
+  --- Update total playtime by calculating from all characters
+  ---@return AmbitionsUserObject self For method chaining
+  function self:updateTotalPlaytime()
+    local total = 0
+    for _, character in pairs(self.characters) do
+      if character.getPlaytime then
+        total = total + character:getPlaytime()
+      end
+    end
+
+    self.totalPlaytime = total
 
     return self
   end
