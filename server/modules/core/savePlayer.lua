@@ -174,9 +174,7 @@ local function SavePlayerDropped(sessionId, playerObject)
   local userSaved = SaveUserData(PLAYER_LICENSE, playerObject)
   local characterSaved = SaveCharacterData(CHARACTER_OBJECT)
 
-  if userSaved and characterSaved then
-    amb.print.success('Player ', GetPlayerName(sessionId), ' saved successfully')
-  else
+  if not (userSaved and characterSaved) then
     amb.print.error('Failed to save player ', GetPlayerName(sessionId))
   end
 
