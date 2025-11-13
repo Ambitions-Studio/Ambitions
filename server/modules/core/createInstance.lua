@@ -25,11 +25,18 @@ RegisterNetEvent('ambitions:server:insertUserIntoCache', function(sessionId, pla
 
     local success = amb.cache.addPlayer(sessionId, userObject)
 
-    if not success then 
+    if not success then
         amb.print.error('Failed to add player ' .. sessionId .. ' to cache')
         DropPlayer(sessionId, 'Failed to add player ' .. sessionId .. ' to cache, please contant an administrator')
         return
     end
+
+    -- Debug prints
+    amb.print.success('User inserted into cache for session ' .. sessionId)
+    amb.print.info('User Object:')
+    amb.print.info(userObject)
+    amb.print.info('Cache Stats:')
+    amb.print.info(amb.cache.getPlayerCacheStats())
 end)
 
 
@@ -68,4 +75,13 @@ RegisterNetEvent('ambitions:server:insertCharacterIntoCache', function(sessionId
 
     userObject:setCurrentCharacter(uniqueId)
     userObject.currentCharacter:setActive(true)
+
+    -- Debug prints
+    amb.print.success('Character inserted into cache for session ' .. sessionId .. ' with uniqueId ' .. uniqueId)
+    amb.print.info('User Object:')
+    amb.print.info(userObject)
+    amb.print.info('Character Object:')
+    amb.print.info(characterObject)
+    amb.print.info('Cache Stats:')
+    amb.print.info(amb.cache.getPlayerCacheStats())
 end)
