@@ -35,9 +35,18 @@ local function SaveCharacterData(characterObject)
     return false
   end
 
-  local playtime = characterObject:getPlaytime()
-  local pedModel = characterObject:getPedModel()
+  -- Extract all character data from cache
   local uniqueId = characterObject:getUniqueId()
+  local firstname = characterObject:getFirstname()
+  local lastname = characterObject:getLastname()
+  local dateofbirth = characterObject:getDateOfBirth()
+  local sex = characterObject:getSex()
+  local nationality = characterObject:getNationality()
+  local height = characterObject:getHeight()
+  local appearance = characterObject:getAppearance()
+  local group = characterObject:getGroup()
+  local pedModel = characterObject:getPedModel()
+  local playtime = characterObject:getPlaytime()
 
   local storedPosition = characterObject.position
 
@@ -47,10 +56,42 @@ local function SaveCharacterData(characterObject)
   local roundedHeading = amb.math.round(storedPosition.heading, 4)
   local roundedPlaytime = amb.math.round(playtime)
 
-  local success = MySQL.update.await(
-    'UPDATE characters SET ped_model = ?, position_x = ?, position_y = ?, position_z = ?, heading = ?, playtime = ?, last_played = NOW() WHERE unique_id = ?',
-    { pedModel, roundedX, roundedY, roundedZ, roundedHeading, roundedPlaytime, uniqueId }
-  )
+  -- Update ALL character fields in database
+  local success = MySQL.update.await([[
+    UPDATE characters SET
+      firstname = ?,
+      lastname = ?,
+      dateofbirth = ?,
+      sex = ?,
+      nationality = ?,
+      height = ?,
+      appearance = ?,
+      `group` = ?,
+      ped_model = ?,
+      position_x = ?,
+      position_y = ?,
+      position_z = ?,
+      heading = ?,
+      playtime = ?,
+      last_played = NOW()
+    WHERE unique_id = ?
+  ]], {
+    firstname,
+    lastname,
+    dateofbirth,
+    sex,
+    nationality,
+    height,
+    appearance,
+    group,
+    pedModel,
+    roundedX,
+    roundedY,
+    roundedZ,
+    roundedHeading,
+    roundedPlaytime,
+    uniqueId
+  })
 
   if success > 0 then
     return true
@@ -74,6 +115,7 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
     return false
   end
 
+  -- Update live position
   local ped = GetPlayerPed(sessionId)
   if ped and ped > 0 then
     local pedPositions = GetEntityCoords(ped)
@@ -89,9 +131,17 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
     amb.print.warning('Could not get live position for player: ', sessionId, ' - using stored position')
   end
 
+  -- Update playtime
   CHARACTER_OBJECT:updatePlaytime()
 
+  -- Update last seen
   playerObject:updateLastSeen()
+
+  -- Update last played character
+  local currentCharacterUniqueId = CHARACTER_OBJECT:getUniqueId()
+  if currentCharacterUniqueId then
+    playerObject.lastPlayedCharacter = currentCharacterUniqueId
+  end
 
   return true
 end

@@ -16,7 +16,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@field height number Character's height in cm
   ---@field appearance string | nil Character's appearance data (JSON or serialized)
   ---@field pedModel string The model of the character
-  ---@field position table Current position {x, y, z, heading}
+  ---@field position table | vector3 | vector4 Current position {x, y, z, heading}
   ---@field group string Character's permission group
   ---@field isActive boolean Whether this character is currently active
   ---@field lastPlayed number | nil Timestamp of last play session
@@ -79,6 +79,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
       end
     end
 
+    self.position = coords
     return coords
   end
 
