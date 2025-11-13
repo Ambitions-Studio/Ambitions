@@ -93,13 +93,13 @@ function amb.cache.getPlayerCacheStats()
   }
 
   for _, user in pairs(cache) do
-    if user:isUserOnline() then
+    if user.isUserOnline() then
       stats.onlinePlayers = stats.onlinePlayers + 1
     end
 
-    stats.totalCharacters = stats.totalCharacters + user:getCharacterCount()
+    stats.totalCharacters = stats.totalCharacters + user.getCharacterCount()
 
-    if user:getCurrentCharacter() and user:getCurrentCharacter():isCharacterActive() then
+    if user.getCurrentCharacter() and user.getCurrentCharacter().isCharacterActive() then
       stats.activePlayers = stats.activePlayers + 1
     end
   end
