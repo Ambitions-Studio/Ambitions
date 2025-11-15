@@ -98,7 +98,56 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   --- Get character's group
   ---@return string group The character's permission group
   function self.getGroup()
+    if not self.group or self.group == "" then
+      return "ambitioneers"
+    end
+
     return self.group
+  end
+
+  --- Check if character has a specific permission
+  ---@param permission string The permission to check (e.g., "admin.getCoords")
+  ---@return boolean hasPermission Whether the character has the permission
+  function self.hasPermission(permission)
+    if not permission or permission == "" then
+      return false
+    end
+
+    local role = self.getGroup()
+    if not role then
+      return false
+    end
+
+    local roleData = permissionsConfig[role]
+    if not roleData or not roleData.permissions then
+      return false
+    end
+
+    for _, perm in ipairs(roleData.permissions) do
+      if perm == permission then
+        return true
+      end
+
+      if perm == "*" then
+        return true
+      end
+
+      if perm:find("%.") then
+        local patternNamespace, patternAction = perm:match("^([^%.]+)%.(.+)$")
+        local permNamespace, permAction = permission:match("^([^%.]+)%.(.+)$")
+
+        if patternNamespace and permNamespace then
+          local namespaceMatch = (patternNamespace == "*" or patternNamespace == permNamespace)
+          local actionMatch = (patternAction == "*" or patternAction == permAction)
+
+          if namespaceMatch and actionMatch then
+            return true
+          end
+        end
+      end
+    end
+
+    return false
   end
 
   --- Get character's last played timestamp
@@ -247,6 +296,18 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@param group string The group to set
   ---@return AmbitionsCharacterObject self For method chaining
   function self.setGroup(group)
+    if not group or group == "" then
+      amb.print.warning("Invalid group provided to setGroup, using default group 'ambitioneers'")
+      self.group = "ambitioneers"
+      return self
+    end
+
+    if not permissionsConfig[group] then
+      amb.print.warning("Group '" .. group .. "' does not exist in permissions config, using default group 'ambitioneers'")
+      self.group = "ambitioneers"
+      return self
+    end
+
     self.group = group
 
     return self
