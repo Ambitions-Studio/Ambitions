@@ -187,7 +187,7 @@ schemaConfig = {
         {
           name = "needs",
           type = "LONGTEXT",
-          notNull = true,
+          default = "NULL",
           comment = "Character needs data stored as JSON"
         },
         {
