@@ -1,14 +1,12 @@
 --- Get player coordinates command
 amb.RegisterCommand("getcoords", "admin.getCoords", function(player, args, showMessage)
     if not player then
-        print("This command cannot be used from console")
-        return
+        return showMessage("This command cannot be used from console")
     end
 
     local character = player.getCurrentCharacter()
     if not character then
-        showMessage("You need to have an active character", "error")
-        return
+        return showMessage("You need to have an active character", "error")
     end
 
     local coords = character.getPosition(true, true)

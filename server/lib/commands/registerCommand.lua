@@ -6,10 +6,10 @@ local registeredCommands = {}
 --- Validate and convert command arguments based on type
 ---@param args table The raw arguments from the command
 ---@param suggestion table The suggestion configuration with argument definitions
----@param source number The player source
+---@param sessionId number The player session ID
 ---@return table | nil parsedArgs The parsed arguments or nil if validation failed
 ---@return string | nil error The error message if validation failed
-local function ValidateArguments(args, suggestion, source)
+local function ValidateArguments(args, suggestion, sessionId)
     if not suggestion or not suggestion.arguments then
         return args, nil
     end
@@ -21,6 +21,7 @@ local function ValidateArguments(args, suggestion, source)
     end
 
     local parsedArgs = {}
+    local err = nil
 
     for index, argDef in ipairs(suggestion.arguments) do
         local rawValue = args[index]
@@ -30,40 +31,43 @@ local function ValidateArguments(args, suggestion, source)
         if argType == "number" then
             local numValue = tonumber(rawValue)
             if not numValue then
-                return nil, ("Argument #%d (%s) must be a number"):format(index, argName)
+                err = ("Argument #%d (%s) must be a number"):format(index, argName)
+            else
+                parsedArgs[argName] = numValue
             end
-            parsedArgs[argName] = numValue
 
         elseif argType == "player" then
-            local targetSource = tonumber(rawValue)
+            local targetSessionId = tonumber(rawValue)
 
             if rawValue == "me" then
-                targetSource = source
+                targetSessionId = sessionId
             end
 
-            if not targetSource then
-                return nil, ("Argument #%d (%s) must be a valid player ID"):format(index, argName)
+            if not targetSessionId then
+                err = ("Argument #%d (%s) must be a valid player ID"):format(index, argName)
+            else
+                local targetPlayer = amb.player.get(targetSessionId)
+                if targetPlayer then
+                    parsedArgs[argName] = targetPlayer
+                else
+                    err = ("Player with ID %d not found"):format(targetSessionId)
+                end
             end
-
-            local targetPlayer = amb.player.get(targetSource)
-            if not targetPlayer then
-                return nil, ("Player with ID %d not found"):format(targetSource)
-            end
-
-            parsedArgs[argName] = targetPlayer
 
         elseif argType == "string" then
             if not rawValue or rawValue == "" then
-                return nil, ("Argument #%d (%s) must be a valid string"):format(index, argName)
+                err = ("Argument #%d (%s) must be a valid string"):format(index, argName)
+            else
+                parsedArgs[argName] = tostring(rawValue)
             end
-            parsedArgs[argName] = tostring(rawValue)
 
         elseif argType == "coordinate" then
             local coord = tonumber(rawValue)
             if not coord then
-                return nil, ("Argument #%d (%s) must be a valid coordinate"):format(index, argName)
+                err = ("Argument #%d (%s) must be a valid coordinate"):format(index, argName)
+            else
+                parsedArgs[argName] = coord
             end
-            parsedArgs[argName] = coord
 
         elseif argType == "merge" then
             local length = 0
@@ -82,14 +86,22 @@ local function ValidateArguments(args, suggestion, source)
             parsedArgs[argName] = rawValue
         end
 
-        if argDef.Validator and type(argDef.Validator.validate) == "function" then
+        if argDef.Validator and type(argDef.Validator.validate) == "function" and not err then
             local candidate = parsedArgs[argName]
             local ok, result = pcall(argDef.Validator.validate, candidate)
 
             if not ok or result ~= true then
-                return nil, argDef.Validator.err or ("Argument #%d (%s) validation failed"):format(index, argName)
+                err = argDef.Validator.err or ("Argument #%d (%s) validation failed"):format(index, argName)
             end
         end
+
+        if err then
+            break
+        end
+    end
+
+    if err then
+        return nil, err
     end
 
     return parsedArgs, nil
@@ -97,8 +109,8 @@ end
 
 --- Register a command with permission checking and argument validation
 ---@param commandName string | table The command name or table of names
----@param permission string | nil The permission required (command name from permissionsConfig)
----@param callback function The callback function(source, args, showError)
+---@param permission string | nil The permission required (e.g., "admin.getCoords")
+---@param callback function The callback function(player, args, showError)
 ---@param options table | nil Optional configuration { allowConsole: boolean, suggestion: table }
 function amb.RegisterCommand(commandName, permission, callback, options)
     if type(commandName) == "table" then
@@ -135,64 +147,63 @@ function amb.RegisterCommand(commandName, permission, callback, options)
     }
 
     RegisterCommand(commandName, function(source, args)
+        local sessionId = source
         local command = registeredCommands[commandName]
 
-        if source == 0 then
-            if not command.allowConsole then
-                amb.print.warning(("Command '%s' cannot be executed from console"):format(commandName))
-                return
-            end
-
-            command.callback(0, args, function(msg)
-                print(("[COMMAND] %s"):format(msg))
-            end)
+        if not command.allowConsole and sessionId == 0 then
+            amb.print.warning(("Command '%s' cannot be executed from console"):format(commandName))
             return
         end
 
+        local player = sessionId ~= 0 and amb.player.get(sessionId) or false
+        local err = nil
+
         if command.permission then
-            if not amb.permissions.HasPermission(source, command.permission) then
-                local player = amb.player.get(source)
-                if player then
-                    amb.print.warning(("Player %d attempted to use command '%s' without permission"):format(source, commandName))
+            if not amb.permissions.HasPermission(sessionId, command.permission) then
+                if sessionId == 0 then
+                    amb.print.warning(("Console does not have permission '%s'"):format(command.permission))
+                else
+                    amb.print.warning(("Player %d attempted to use command '%s' without permission"):format(sessionId, commandName))
                 end
                 return
             end
         end
 
-        local parsedArgs = args
-        local validationError = nil
-
         if command.suggestion and command.suggestion.arguments then
-            parsedArgs, validationError = ValidateArguments(args, command.suggestion, source)
+            args, err = ValidateArguments(args, command.suggestion, sessionId)
+        end
 
-            if validationError then
-                local player = amb.player.get(source)
+        if err then
+            if sessionId == 0 then
+                amb.print.error(err)
+            else
                 if player then
                     local character = player.getCurrentCharacter()
                     if character then
                         character.triggerEvent("ambitions:showNotification", {
                             type = "error",
-                            message = validationError
+                            message = err
                         })
                     end
                 end
-                return
             end
-        end
-
-        local player = amb.player.get(source)
-
-        command.callback(player, parsedArgs, function(msg, msgType)
-            if player then
-                local character = player.getCurrentCharacter()
-                if character then
-                    character.triggerEvent("ambitions:showNotification", {
-                        type = msgType or "info",
-                        message = msg
-                    })
+        else
+            command.callback(player, args, function(msg, msgType)
+                if sessionId == 0 then
+                    amb.print.info(("[COMMAND] %s"):format(msg))
+                else
+                    if player then
+                        local character = player.getCurrentCharacter()
+                        if character then
+                            character.triggerEvent("ambitions:showNotification", {
+                                type = msgType or "info",
+                                message = msg
+                            })
+                        end
+                    end
                 end
-            end
-        end)
+            end)
+        end
     end, true)
 end
 
@@ -224,3 +235,5 @@ function amb.commands.Unregister(commandName)
     registeredCommands[commandName] = nil
     return true
 end
+
+amb.print.success("Command Registration System loaded successfully")
