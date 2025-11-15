@@ -17,7 +17,8 @@ permissionsConfig = {
         inherits = {'admin'},
         permissions = {
             'ambitioneer.ban',
-            'ambitioneer.setRole'
+            'ambitioneer.setRole',
+            'ambitioneer.testNeed'
         }
     }
 }
