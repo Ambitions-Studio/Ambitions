@@ -158,13 +158,9 @@ function amb.RegisterCommand(commandName, permission, callback, options)
         local player = sessionId ~= 0 and amb.player.get(sessionId) or false
         local err = nil
 
-        if command.permission then
+        if command.permission and sessionId ~= 0 then
             if not amb.permissions.HasPermission(sessionId, command.permission) then
-                if sessionId == 0 then
-                    amb.print.warning(("Console does not have permission '%s'"):format(command.permission))
-                else
-                    amb.print.warning(("Player %d attempted to use command '%s' without permission"):format(sessionId, commandName))
-                end
+                amb.print.warning(("Player %d attempted to use command '%s' without permission"):format(sessionId, commandName))
                 return
             end
         end
