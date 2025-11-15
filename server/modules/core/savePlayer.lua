@@ -47,6 +47,7 @@ local function SaveCharacterData(characterObject)
   local group = characterObject.getGroup()
   local pedModel = characterObject.getPedModel()
   local playtime = characterObject.getPlaytime()
+  local needs = characterObject.getNeedsManager().serialize()
 
   local storedPosition = characterObject.position
 
@@ -72,6 +73,7 @@ local function SaveCharacterData(characterObject)
       position_y = ?,
       position_z = ?,
       heading = ?,
+      needs = ?,
       playtime = ?,
       last_played = NOW()
     WHERE unique_id = ?
@@ -89,6 +91,7 @@ local function SaveCharacterData(characterObject)
     roundedY,
     roundedZ,
     roundedHeading,
+    needs,
     roundedPlaytime,
     uniqueId
   })
