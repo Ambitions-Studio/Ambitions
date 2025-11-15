@@ -43,20 +43,87 @@ We strongly recommend testing with the latest **FiveM artifacts (12208+)**.
 
 ---
 
-## 🔀 Creating a Pull Request
+## 🔀 Git Workflow & Branch Strategy
 
-1. **Fork the repository**
-2. Create a new branch: `git checkout -b feat/your-feature-name`
-3. Make your changes
-4. Test your code locally (and ideally with multiple players)
-5. Commit using clear messages:
-   ```sh
-   git commit -m "feat(core): added player inventory sync on logout"
+### Our Two-Tier Branch System
+
+- **`main`** – Production-ready code. 100% clean, tested, and error-free.
+- **`dev`** – Testing & quality assurance. Last barrier before production.
+
+### Contribution Flow
+
+```
+Contributor:  main → feature/xxx → PR to dev
+Maintainer:   dev (review/test) → PR to main
+```
+
+### Step-by-Step Guide
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Ambitions-Studio/Ambitions.git
+   cd Ambitions
    ```
-6. Push: `git push origin feat/your-feature-name`
-7. Open a Pull Request against the `dev` branch
 
-Your PR will be reviewed by a maintainer. You may be asked to make changes before it's accepted.
+2. **Create a feature branch from `main`**
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/your-feature-name
+   ```
+
+   Branch naming conventions:
+   - `feature/` – New features (e.g., `feature/inventory-system`)
+   - `fix/` – Bug fixes (e.g., `fix/character-spawn-error`)
+   - `refactor/` – Code refactoring (e.g., `refactor/permission-cache`)
+   - `docs/` – Documentation changes (e.g., `docs/callback-examples`)
+
+3. **Make your changes**
+   - Follow all code standards outlined in this document
+   - Test locally with multiple scenarios
+   - Ensure no console prints, debug code, or test data remains
+
+4. **Commit with clear messages**
+   ```bash
+   git add .
+   git commit -m "TYPE - Clear description of what changed"
+   ```
+
+   Commit message types:
+   - `ADD` – Adding new functionality
+   - `FIX` – Fixing bugs or errors
+   - `REMOVE` – Removing code or files
+   - `REFACTOR` – Code restructuring without behavior change
+   - `UPDATE` – Updating existing features
+   - `DOCS` – Documentation changes
+
+5. **Push your branch**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+6. **Open a Pull Request targeting `dev`**
+   - Go to GitHub and open a PR
+   - **Target branch: `dev`** (NOT `main`)
+   - Fill out the PR template completely
+   - Link related issues if applicable
+
+7. **Review & Testing Phase**
+   - A maintainer will test your changes in `dev`
+   - Code quality, standards, and functionality will be reviewed
+   - You may be asked to make changes
+
+8. **Merge to `main`**
+   - Once approved in `dev`, maintainers will create a PR from `dev` → `main`
+   - Only 100% validated code reaches `main`
+
+### Important Rules
+
+- ❌ **Never push directly to `main` or `dev`**
+- ❌ **Never create PRs targeting `main`** (only maintainers do this)
+- ✅ **Always branch from `main`** (the stable base)
+- ✅ **Always target `dev`** with your PRs
+- ✅ **Keep PRs focused** – One feature/fix per PR
 
 ---
 
