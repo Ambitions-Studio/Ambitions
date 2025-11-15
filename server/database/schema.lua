@@ -185,6 +185,12 @@ schemaConfig = {
           notNull = true
         },
         {
+          name = "needs",
+          type = "LONGTEXT",
+          notNull = true,
+          comment = "Character needs data stored as JSON"
+        },
+        {
           name = "playtime",
           type = "INT",
           unsigned = true,

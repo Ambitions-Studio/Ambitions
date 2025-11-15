@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `characters`(
   `position_y` FLOAT NOT NULL,
   `position_z` FLOAT NOT NULL,
   `heading` FLOAT NOT NULL,
+  `needs` LONGTEXT NOT NULL COMMENT 'Character needs data stored as JSON',
   `playtime` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Character playtime in seconds',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_played` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
