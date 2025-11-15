@@ -95,7 +95,7 @@ function amb.permissions.GetPlayerRole(source)
         return nil
     end
 
-    local player = amb.player.get(source)
+    local player = amb.cache.getPlayer(source)
     if not player then
         return nil
     end

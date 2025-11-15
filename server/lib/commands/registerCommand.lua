@@ -46,7 +46,7 @@ local function ValidateArguments(args, suggestion, sessionId)
             if not targetSessionId then
                 err = ("Argument #%d (%s) must be a valid player ID"):format(index, argName)
             else
-                local targetPlayer = amb.player.get(targetSessionId)
+                local targetPlayer = amb.cache.getPlayer(targetSessionId)
                 if targetPlayer then
                     parsedArgs[argName] = targetPlayer
                 else
@@ -155,7 +155,7 @@ function amb.RegisterCommand(commandName, permission, callback, options)
             return
         end
 
-        local player = sessionId ~= 0 and amb.player.get(sessionId) or false
+        local player = sessionId ~= 0 and amb.cache.getPlayer(sessionId) or false
         local err = nil
 
         if command.permission and sessionId ~= 0 then
