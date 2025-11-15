@@ -224,7 +224,3 @@ function amb.commands.Unregister(commandName)
     registeredCommands[commandName] = nil
     return true
 end
-
-
-amb.RegisterCommand('testCommand', 'admin', function()
-end)
