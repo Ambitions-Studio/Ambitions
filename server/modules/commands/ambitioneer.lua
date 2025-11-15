@@ -1,34 +1,12 @@
 --- Set player role command
-amb.RegisterCommand("setrole", "ambitioneer.setRole", function(source, args, showMessage)
-    local isConsole = (source == 0)
-
-    local targetPlayer = amb.player.get(args.target)
-    if not targetPlayer then
-        if isConsole then
-            print(("[ERROR] Player with ID %d not found"):format(args.target))
-        else
-            showMessage(("Player with ID %d not found"):format(args.target), "error")
-        end
-        return
-    end
-
-    local targetCharacter = targetPlayer.getCurrentCharacter()
-    if not targetCharacter then
-        if isConsole then
-            print(("[ERROR] Target player has no active character"):format(args.target))
-        else
-            showMessage("Target player has no active character", "error")
-        end
-        return
-    end
-
+amb.RegisterCommand("setrole", "ambitioneer.setRole", function(player, args, showMessage)
     if not amb.permissions.RoleExists(args.role) then
-        if isConsole then
-            print(("[ERROR] Role '%s' does not exist"):format(args.role))
-        else
-            showMessage(("Role '%s' does not exist"):format(args.role), "error")
-        end
-        return
+        return showMessage(("Role '%s' does not exist"):format(args.role), "error")
+    end
+
+    local targetCharacter = args.target.getCurrentCharacter()
+    if not targetCharacter then
+        return showMessage("Target player has no active character", "error")
     end
 
     local oldRole = targetCharacter.getGroup()
@@ -37,15 +15,18 @@ amb.RegisterCommand("setrole", "ambitioneer.setRole", function(source, args, sho
     local targetName = targetCharacter.getFullName()
     local successMessage = ("Role changed: %s (%s -> %s)"):format(targetName, oldRole, args.role)
 
-    if isConsole then
-        print(("[SUCCESS] " .. successMessage))
-    else
-        local executor = amb.player.get(source)
-        local executorCharacter = executor.getCurrentCharacter()
-        showMessage(successMessage, "success")
+    showMessage(successMessage, "success")
 
+    if player then
+        local executorCharacter = player.getCurrentCharacter()
         amb.print.info(("%s changed %s's role from '%s' to '%s'"):format(
             executorCharacter.getFullName(),
+            targetName,
+            oldRole,
+            args.role
+        ))
+    else
+        amb.print.info(("Console changed %s's role from '%s' to '%s'"):format(
             targetName,
             oldRole,
             args.role
@@ -57,7 +38,7 @@ end, {
         help = "Change a player's role",
         validate = true,
         arguments = {
-            { name = "target", type = "number", help = "Player session ID" },
+            { name = "target", type = "player", help = "Player session ID" },
             { name = "role", type = "string", help = "Role name (user, admin, ambitioneer)" }
         }
     }
