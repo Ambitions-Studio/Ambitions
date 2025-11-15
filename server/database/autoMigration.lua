@@ -18,6 +18,8 @@ local function runAutoMigration()
         amb.print.info('  - ' .. migrationInfo.version .. ' (applied: ' .. migrationInfo.applied_at .. ')')
       end
     end
+
+    SyncPermissionsToDatabase()
   else
     amb.print.error('Auto-migration failed after ' .. duration .. 'ms')
     amb.print.error('Please check your database configuration and try again')

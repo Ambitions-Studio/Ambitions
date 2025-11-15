@@ -229,6 +229,132 @@ schemaConfig = {
       }
     },
 
+    roles = {
+      columns = {
+        {
+          name = "id",
+          type = "INT",
+          autoIncrement = true,
+          primaryKey = true
+        },
+    {
+          name = "name",
+          type = "VARCHAR",
+          length = 50,
+          notNull = true,
+          unique = true
+        },
+    {
+          name = "label",
+          type = "VARCHAR",
+          length = 100,
+          notNull = true
+        },
+    {
+          name = "created_at",
+          type = "TIMESTAMP",
+          notNull = true,
+          default = "CURRENT_TIMESTAMP"
+        }
+      }
+    },
+
+    permissions = {
+      columns = {
+        {
+          name = "id",
+          type = "INT",
+          autoIncrement = true,
+          primaryKey = true
+        },
+        {
+          name = "name",
+          type = "VARCHAR",
+          length = 100,
+          notNull = true,
+          unique = true
+        },
+        {
+          name = "description",
+          type = "VARCHAR",
+          length = 255,
+          default = "NULL"
+        }
+      }
+    },
+
+    role_permissions = {
+      columns = {
+        {
+          name = "role_id",
+          type = "INT",
+          notNull = true
+        },
+        {
+          name = "permission_id",
+          type = "INT",
+          notNull = true
+        }
+      },
+      primaryKey = {"role_id", "permission_id"},
+      foreignKeys = {
+        {
+          name = "fk_role_permissions_role",
+          column = "role_id",
+          references = {
+            table = "roles",
+            column = "id"
+          },
+          onDelete = "CASCADE"
+        },
+        {
+          name = "fk_role_permissions_permission",
+          column = "permission_id",
+          references = {
+            table = "permissions",
+            column = "id"
+          },
+          onDelete = "CASCADE"
+        }
+      }
+    },
+
+    character_roles = {
+      columns = {
+        {
+          name = "character_id",
+          type = "INT",
+          notNull = true
+        },
+        {
+          name = "role_id",
+          type = "INT",
+          notNull = true
+        }
+      },
+      primaryKey = {"character_id", "role_id"},
+      foreignKeys = {
+        {
+          name = "fk_character_roles_character",
+          column = "character_id",
+          references = {
+            table = "characters",
+            column = "id"
+          },
+          onDelete = "CASCADE"
+        },
+        {
+          name = "fk_character_roles_role",
+          column = "role_id",
+          references = {
+            table = "roles",
+            column = "id"
+          },
+          onDelete = "CASCADE"
+        }
+      }
+    },
+
     -- Table for migration tracking
     schema_migrations = {
       columns = {

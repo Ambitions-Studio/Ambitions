@@ -30,11 +30,13 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
 
     'config/migration.lua',
+    'config/permissions.lua',
 
     'server/database/schema.lua',
     'server/database/sqlGenerator.lua',
     'server/database/connectionValidator.lua',
     'server/database/migration.lua',
+    'server/database/permissionsSync.lua',
     'server/database/autoMigration.lua',
 
     'server/classes/*.lua',
@@ -42,11 +44,12 @@ server_scripts {
     'server/lib/**/*.lua',
 
     'server/modules/**/*.lua',
+
+    'server/init.lua'
 }
 
 client_scripts {
-    'client/lib/**/*.lua',
-    'client/init.lua'
+    -- 'client/lib/**/*.lua'
 }
 
 files {
