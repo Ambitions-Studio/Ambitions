@@ -10,13 +10,15 @@ amb.RegisterCommand("testneed", "ambitioneer.testNeed", function(player, args, s
     end
 
     local needs = character.getNeeds()
-    local needsMessage = "Your needs:"
+    local needsText = ""
 
     for needType, value in pairs(needs) do
-        needsMessage = needsMessage .. ("\n  %s: %d/100"):format(needType, value)
+        needsText = needsText .. ("%s: %d/100 | "):format(needType, value)
     end
 
-    showMessage(needsMessage, "info")
+    needsText = needsText:sub(1, -4)
+
+    TriggerClientEvent('amb:showNotification', player.sessionId, "Needs Debug", needsText, "debug", 6000, "top-right")
 end, {
     allowConsole = false,
     suggestion = {
