@@ -201,8 +201,7 @@ schemaConfig = {
         {
           name = "status",
           type = "JSON",
-          notNull = true,
-          default = "'{}'",
+          default = "NULL",
           comment = "Character status data (health, armor) stored as JSON"
         },
         {

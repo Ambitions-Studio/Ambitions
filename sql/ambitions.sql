@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `characters`(
   `heading` FLOAT NOT NULL,
   `needs` LONGTEXT DEFAULT NULL COMMENT 'Character needs data stored as JSON',
   `is_dead` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether the character is dead',
-  `status` JSON NOT NULL DEFAULT ('{}') COMMENT 'Character status data (health, armor) stored as JSON',
+  `status` JSON DEFAULT NULL COMMENT 'Character status data (health, armor) stored as JSON',
   `playtime` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Character playtime in seconds',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_played` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
