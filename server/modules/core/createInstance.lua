@@ -147,6 +147,8 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
             end
         end
 
+        print('DEBUG is_dead from DB:', char.is_dead, 'type:', type(char.is_dead))
+
         local characterData = {
             firstname = char.firstname,
             lastname = char.lastname,
@@ -167,7 +169,7 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
             createdAt = char.created_at,
             lastPlayed = char.last_played,
             needs = needsData,
-            isDead = char.is_dead == 1,
+            isDead = char.is_dead == 1 or char.is_dead == true,
             status = statusData
         }
 
