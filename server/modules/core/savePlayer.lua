@@ -139,20 +139,16 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
 
     local pedHealth = GetEntityHealth(ped)
     local pedArmor = GetPedArmour(ped)
-    local pedIsDead = IsEntityDead(ped)
 
-    CHARACTER_OBJECT.setIsDead(pedIsDead)
+    local healthPercent = math.floor((pedHealth - 100) / 100 * 100)
+    if healthPercent < 0 then healthPercent = 0 end
+    if healthPercent > 100 then healthPercent = 100 end
 
-    if pedIsDead then
-      CHARACTER_OBJECT.setHealth(0)
-      CHARACTER_OBJECT.setArmor(0)
-    else
-      local healthPercent = math.floor((pedHealth - 100) / 100 * 100)
-      if healthPercent < 0 then healthPercent = 0 end
-      if healthPercent > 100 then healthPercent = 100 end
-      CHARACTER_OBJECT.setHealth(healthPercent)
-      CHARACTER_OBJECT.setArmor(pedArmor)
-    end
+    local isDead = healthPercent <= 0
+
+    CHARACTER_OBJECT.setIsDead(isDead)
+    CHARACTER_OBJECT.setHealth(healthPercent)
+    CHARACTER_OBJECT.setArmor(isDead and 0 or pedArmor)
   else
     amb.print.warning('Could not get live position for player: ', sessionId, ' - using stored position')
   end
