@@ -139,6 +139,14 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
             end
         end
 
+        local statusData = nil
+        if char.status then
+            local statusSuccess, statusDecoded = pcall(json.decode, char.status)
+            if statusSuccess then
+                statusData = statusDecoded
+            end
+        end
+
         local characterData = {
             firstname = char.firstname,
             lastname = char.lastname,
@@ -158,7 +166,9 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
             playtime = char.playtime or 0,
             createdAt = char.created_at,
             lastPlayed = char.last_played,
-            needs = needsData
+            needs = needsData,
+            isDead = char.is_dead == 1,
+            status = statusData
         }
 
         local characterObject = CreateAmbitionsCharacterObject(sessionId, char.unique_id, characterData)

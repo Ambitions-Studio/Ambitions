@@ -23,6 +23,9 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@field createdAt number | nil Character creation timestamp
   ---@field playtime number Character playtime in seconds
   ---@field needsManager AmbitionsNeedsManager Character needs manager instance
+  ---@field isDead boolean Whether the character is dead
+  ---@field health number Character's health (0-100)
+  ---@field armor number Character's armor (0-100)
   local self = {}
   self.sessionId = sessionId
   self.uniqueId = uniqueId
@@ -41,6 +44,10 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   self.createdAt = data.createdAt or nil
   self.playtime = data.playtime or 0
   self.needsManager = CreateAmbitionsNeedsManager(uniqueId, data.needs)
+  self.isDead = data.isDead or false
+  local status = data.status or {}
+  self.health = status.health or 100
+  self.armor = status.armor or 0
 
   --- Trigger an event for the user
   ---@param eventName string The name of the event to trigger
@@ -432,6 +439,67 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@return AmbitionsNeedsManager needsManager The needs manager instance
   function self.getNeedsManager()
     return self.needsManager
+  end
+
+  --- Get character's dead status
+  ---@return boolean isDead Whether the character is dead
+  function self.getIsDead()
+    return self.isDead
+  end
+
+  --- Set character's dead status
+  ---@param dead boolean Whether the character is dead
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setIsDead(dead)
+    self.isDead = dead or false
+    return self
+  end
+
+  --- Get character's health
+  ---@return number health Character's health (0-100)
+  function self.getHealth()
+    return self.health
+  end
+
+  --- Set character's health
+  ---@param value number The health value (0-100)
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setHealth(value)
+    if not value or type(value) ~= "number" then
+      value = 100
+    end
+    if value < 0 then value = 0 end
+    if value > 100 then value = 100 end
+    self.health = value
+    return self
+  end
+
+  --- Get character's armor
+  ---@return number armor Character's armor (0-100)
+  function self.getArmor()
+    return self.armor
+  end
+
+  --- Set character's armor
+  ---@param value number The armor value (0-100)
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setArmor(value)
+    if not value or type(value) ~= "number" then
+      value = 0
+    end
+    if value < 0 then value = 0 end
+    if value > 100 then value = 100 end
+    self.armor = value
+    return self
+  end
+
+  --- Get character's status (health and armor)
+  ---@return table status Character's status {health, armor}
+  function self.getStatus()
+    return {
+      health = self.health,
+      armor = self.armor
+    }
   end
 
   --- Save character data to database

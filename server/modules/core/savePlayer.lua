@@ -48,6 +48,8 @@ local function SaveCharacterData(characterObject)
   local pedModel = characterObject.getPedModel()
   local playtime = characterObject.getPlaytime()
   local needs = characterObject.getNeedsManager().serialize()
+  local isDead = characterObject.getIsDead() and 1 or 0
+  local status = json.encode(characterObject.getStatus())
 
   local storedPosition = characterObject.position
 
@@ -74,6 +76,8 @@ local function SaveCharacterData(characterObject)
       position_z = ?,
       heading = ?,
       needs = ?,
+      is_dead = ?,
+      status = ?,
       playtime = ?,
       last_played = NOW()
     WHERE unique_id = ?
@@ -92,6 +96,8 @@ local function SaveCharacterData(characterObject)
     roundedZ,
     roundedHeading,
     needs,
+    isDead,
+    status,
     roundedPlaytime,
     uniqueId
   })
@@ -118,7 +124,7 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
     return false
   end
 
-  -- Update live position
+  -- Update live position and status
   local ped = GetPlayerPed(sessionId)
   if ped and ped > 0 then
     local pedPositions = GetEntityCoords(ped)
@@ -130,6 +136,23 @@ local function UpdateCacheBeforeSave(sessionId, playerObject)
       z = pedPositions.z,
       heading = pedHeading
     }
+
+    local pedHealth = GetEntityHealth(ped)
+    local pedArmor = GetPedArmour(ped)
+    local pedIsDead = IsEntityDead(ped)
+
+    CHARACTER_OBJECT.setIsDead(pedIsDead)
+
+    if pedIsDead then
+      CHARACTER_OBJECT.setHealth(0)
+      CHARACTER_OBJECT.setArmor(0)
+    else
+      local healthPercent = math.floor((pedHealth - 100) / 100 * 100)
+      if healthPercent < 0 then healthPercent = 0 end
+      if healthPercent > 100 then healthPercent = 100 end
+      CHARACTER_OBJECT.setHealth(healthPercent)
+      CHARACTER_OBJECT.setArmor(pedArmor)
+    end
   else
     amb.print.warning('Could not get live position for player: ', sessionId, ' - using stored position')
   end

@@ -191,6 +191,21 @@ schemaConfig = {
           comment = "Character needs data stored as JSON"
         },
         {
+          name = "is_dead",
+          type = "TINYINT",
+          length = 1,
+          notNull = true,
+          default = 0,
+          comment = "Whether the character is dead"
+        },
+        {
+          name = "status",
+          type = "JSON",
+          notNull = true,
+          default = "'{}'",
+          comment = "Character status data (health, armor) stored as JSON"
+        },
+        {
           name = "playtime",
           type = "INT",
           unsigned = true,
