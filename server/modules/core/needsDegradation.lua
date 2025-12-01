@@ -21,6 +21,8 @@ local function StartHungerDegradation()
             for sessionId, userObject in pairs(players) do
                 if userObject.currentCharacter and userObject.currentCharacter.isCharacterActive() then
                     userObject.currentCharacter.getNeedsManager().decay('hunger', needsConfig.degradation.hunger.amount)
+                    local newValue = userObject.currentCharacter.getNeed('hunger')
+                    TriggerClientEvent('ambitions:client:updateNeed', sessionId, 'hunger', newValue)
                 end
             end
         end
@@ -49,6 +51,8 @@ local function StartThirstDegradation()
             for sessionId, userObject in pairs(players) do
                 if userObject.currentCharacter and userObject.currentCharacter.isCharacterActive() then
                     userObject.currentCharacter.getNeedsManager().decay('thirst', needsConfig.degradation.thirst.amount)
+                    local newValue = userObject.currentCharacter.getNeed('thirst')
+                    TriggerClientEvent('ambitions:client:updateNeed', sessionId, 'thirst', newValue)
                 end
             end
         end
