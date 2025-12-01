@@ -17,8 +17,8 @@ needsConfig = {
     },
     healthDecay = {
       enabled = true,
-      amount = 5,
-      interval = 60000
+      amount = 15,
+      interval = 5000
     }
   },
 
