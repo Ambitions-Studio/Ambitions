@@ -11,7 +11,7 @@ local function StartHealthDecay()
 
     CreateThread(function()
         while healthDecayThread do
-            Wait(needsConfig.degradation.hunger.interval)
+            Wait(needsConfig.degradation.healthDecay.interval)
 
             local players = amb.cache.getAllPlayers()
 
