@@ -1,5 +1,45 @@
 local hungerThread = nil
 local thirstThread = nil
+local healthDecayThread = nil
+
+local function StartHealthDecay()
+    if healthDecayThread then
+        return
+    end
+
+    healthDecayThread = true
+
+    CreateThread(function()
+        while healthDecayThread do
+            Wait(needsConfig.degradation.hunger.interval)
+
+            local players = amb.cache.getAllPlayers()
+
+            for sessionId, userObject in pairs(players) do
+                if userObject.currentCharacter and userObject.currentCharacter.isCharacterActive() then
+                    local hunger = userObject.currentCharacter.getNeed('hunger') or 100
+                    local thirst = userObject.currentCharacter.getNeed('thirst') or 100
+                    local isDead = userObject.currentCharacter.getIsDead()
+
+                    if not isDead and (hunger <= 0 or thirst <= 0) then
+                        local damageAmount = needsConfig.degradation.healthDecay.amount
+                        if hunger <= 0 and thirst <= 0 then
+                            damageAmount = damageAmount * 2
+                        end
+                        TriggerClientEvent('ambitions:client:damagePlayer', sessionId, damageAmount)
+                    end
+                end
+            end
+        end
+    end)
+
+    amb.print.success('Health decay thread started')
+end
+
+local function StopHealthDecay()
+    healthDecayThread = nil
+    amb.print.info('Health decay thread stopped')
+end
 
 local function StartHungerDegradation()
     if not needsConfig.degradation.hunger.enabled then
@@ -74,6 +114,7 @@ end
 local function InitializeNeedsDegradation()
     StartHungerDegradation()
     StartThirstDegradation()
+    StartHealthDecay()
     amb.print.success('Needs degradation system initialized')
 end
 
@@ -92,4 +133,5 @@ AddEventHandler('onResourceStop', function(resourceName)
 
     StopHungerDegradation()
     StopThirstDegradation()
+    StopHealthDecay()
 end)
