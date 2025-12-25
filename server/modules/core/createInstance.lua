@@ -131,6 +131,24 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
     for i = 1, #characters do
         local char = characters[i]
 
+        local needsData = nil
+        if char.needs then
+            local success, decoded = pcall(json.decode, char.needs)
+            if success then
+                needsData = decoded
+            end
+        end
+
+        local statusData = nil
+        if char.status then
+            local statusSuccess, statusDecoded = pcall(json.decode, char.status)
+            if statusSuccess then
+                statusData = statusDecoded
+            end
+        end
+
+        -- print('DEBUG is_dead from DB:', char.is_dead, 'type:', type(char.is_dead))re
+
         local characterData = {
             firstname = char.firstname,
             lastname = char.lastname,
@@ -149,7 +167,10 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
             group = char.group or 'user',
             playtime = char.playtime or 0,
             createdAt = char.created_at,
-            lastPlayed = char.last_played
+            lastPlayed = char.last_played,
+            needs = needsData,
+            isDead = char.is_dead == 1 or char.is_dead == true,
+            status = statusData
         }
 
         local characterObject = CreateAmbitionsCharacterObject(sessionId, char.unique_id, characterData)

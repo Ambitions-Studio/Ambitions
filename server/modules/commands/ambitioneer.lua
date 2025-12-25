@@ -1,3 +1,32 @@
+--- Test needs command
+amb.RegisterCommand("testneed", "ambitioneer.testNeed", function(player, args, showMessage)
+    if not player then
+        return showMessage("This command can only be used by players", "error")
+    end
+
+    local character = player.getCurrentCharacter()
+    if not character then
+        return showMessage("You have no active character", "error")
+    end
+
+    local needs = character.getNeeds()
+    local needsText = ""
+
+    for needType, value in pairs(needs) do
+        needsText = needsText .. ("%s: %d/100 | "):format(needType, value)
+    end
+
+    needsText = needsText:sub(1, -4)
+
+    TriggerClientEvent('amb:showNotification', player.sessionId, "Needs Debug", needsText, "debug", 6000, "top-right")
+end, {
+    allowConsole = false,
+    suggestion = {
+        help = "Display your current needs levels",
+        validate = false
+    }
+})
+
 --- Set player role command
 amb.RegisterCommand("setrole", "ambitioneer.setRole", function(player, args, showMessage)
     if not amb.permissions.RoleExists(args.role) then

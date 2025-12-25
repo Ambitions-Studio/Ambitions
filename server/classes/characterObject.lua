@@ -22,6 +22,10 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@field lastPlayed number | nil Timestamp of last play session
   ---@field createdAt number | nil Character creation timestamp
   ---@field playtime number Character playtime in seconds
+  ---@field needsManager AmbitionsNeedsManager Character needs manager instance
+  ---@field isDead boolean Whether the character is dead
+  ---@field health number Character's health (0-100)
+  ---@field armor number Character's armor (0-100)
   local self = {}
   self.sessionId = sessionId
   self.uniqueId = uniqueId
@@ -39,6 +43,11 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   self.lastPlayed = data.lastPlayed or nil
   self.createdAt = data.createdAt or nil
   self.playtime = data.playtime or 0
+  self.needsManager = CreateAmbitionsNeedsManager(uniqueId, data.needs)
+  self.isDead = data.isDead or false
+  local status = data.status or {}
+  self.health = status.health or 100
+  self.armor = status.armor or 0
 
   --- Trigger an event for the user
   ---@param eventName string The name of the event to trigger
@@ -395,14 +404,111 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
     return self
   end
 
+  --- Get all character needs
+  ---@return table needs Character needs table
+  function self.getNeeds()
+    return self.needsManager.getAll()
+  end
+
+  --- Get specific need value
+  ---@param needType string The need type to get (hunger, thirst, etc.)
+  ---@return number | nil value The need value or nil if not found
+  function self.getNeed(needType)
+    return self.needsManager.get(needType)
+  end
+
+  --- Set specific need value
+  ---@param needType string The need type to set (hunger, thirst, etc.)
+  ---@param value number The value to set (will be clamped between min and max)
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setNeed(needType, value)
+    self.needsManager.set(needType, value)
+    return self
+  end
+
+  --- Update specific need value by adding or subtracting amount
+  ---@param needType string The need type to update (hunger, thirst, etc.)
+  ---@param amount number The amount to add (positive) or subtract (negative)
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.updateNeed(needType, amount)
+    self.needsManager.update(needType, amount)
+    return self
+  end
+
+  --- Get the needs manager instance
+  ---@return AmbitionsNeedsManager needsManager The needs manager instance
+  function self.getNeedsManager()
+    return self.needsManager
+  end
+
+  --- Get character's dead status
+  ---@return boolean isDead Whether the character is dead
+  function self.getIsDead()
+    return self.isDead
+  end
+
+  --- Set character's dead status
+  ---@param dead boolean Whether the character is dead
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setIsDead(dead)
+    self.isDead = dead or false
+    return self
+  end
+
+  --- Get character's health
+  ---@return number health Character's health (0-100)
+  function self.getHealth()
+    return self.health
+  end
+
+  --- Set character's health
+  ---@param value number The health value (0-100)
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setHealth(value)
+    if not value or type(value) ~= "number" then
+      value = 100
+    end
+    if value < 0 then value = 0 end
+    if value > 100 then value = 100 end
+    self.health = value
+    return self
+  end
+
+  --- Get character's armor
+  ---@return number armor Character's armor (0-100)
+  function self.getArmor()
+    return self.armor
+  end
+
+  --- Set character's armor
+  ---@param value number The armor value (0-100)
+  ---@return AmbitionsCharacterObject self For method chaining
+  function self.setArmor(value)
+    if not value or type(value) ~= "number" then
+      value = 0
+    end
+    if value < 0 then value = 0 end
+    if value > 100 then value = 100 end
+    self.armor = value
+    return self
+  end
+
+  --- Get character's status (health and armor)
+  ---@return table status Character's status {health, armor}
+  function self.getStatus()
+    return {
+      health = self.health,
+      armor = self.armor
+    }
+  end
+
   --- Save character data to database
   ---@return boolean success Whether the save was successful
   function self.save()
     if self.isActive then
       self.updatePlaytime()
     end
-    
-    -- TODO: Implement database save logic
+
     self.updateLastPlayed()
 
     return true

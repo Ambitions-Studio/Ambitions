@@ -10,3 +10,7 @@ function amb.ShowNotification(notificationTitle, notificationMessage, notificati
         return exports['Ambitions-Notify']:Notify(notificationTitle, notificationMessage, notificationType, notificationDuration, notificationPosition)
     end
 end
+
+RegisterNetEvent('amb:showNotification', function(notificationTitle, notificationMessage, notificationType, notificationDuration, notificationPosition)
+    amb.ShowNotification(notificationTitle, notificationMessage, notificationType, notificationDuration, notificationPosition)
+end)

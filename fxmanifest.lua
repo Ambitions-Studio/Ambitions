@@ -22,7 +22,7 @@ shared_scripts {
 server_script 'server/lib/callback/callback.lua'
 client_script 'client/lib/callback/callback.lua'
 
-shared_script {
+shared_scripts {
     'shared/lib/**/*.lua',
 }
 
@@ -31,6 +31,7 @@ server_scripts {
 
     'config/migration.lua',
     'config/permissions.lua',
+    'config/needs.lua',
 
     'server/database/schema.lua',
     'server/database/sqlGenerator.lua',
@@ -49,7 +50,7 @@ server_scripts {
 }
 
 client_scripts {
-    -- 'client/lib/**/*.lua'
+    'client/lib/**/*.lua'
 }
 
 files {
