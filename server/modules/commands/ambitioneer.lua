@@ -28,6 +28,7 @@ end, {
 })
 
 amb.RegisterCommand("debuginventory", "ambitioneer.debugInventory", function(player, args, showMessage)
+    amb.print.debug('[debuginventory] amb.cache address: ' .. tostring(amb.cache))
     amb.print.debug('[debuginventory] args.target address: ' .. tostring(args.target))
     amb.print.debug('[debuginventory] args.target.sessionId: ' .. tostring(args.target.sessionId))
 
