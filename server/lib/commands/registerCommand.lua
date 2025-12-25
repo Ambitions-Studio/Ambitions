@@ -176,6 +176,7 @@ function amb.RegisterCommand(commandName, permission, callback, options)
         if command.permission and sessionId ~= 0 then
             if not amb.permissions.HasPermission(sessionId, command.permission) then
                 amb.print.warning(("Player %d attempted to use command '%s' without permission"):format(sessionId, commandName))
+                TriggerClientEvent('amb:showNotification', sessionId, 'Permission Denied', 'You do not have permission to use this command', 'error', 5000, 'top-right')
                 return
             end
         end
@@ -188,30 +189,14 @@ function amb.RegisterCommand(commandName, permission, callback, options)
             if sessionId == 0 then
                 amb.print.error(err)
             else
-                if player then
-                    local character = player.getCurrentCharacter()
-                    if character then
-                        character.triggerEvent("ambitions:showNotification", {
-                            type = "error",
-                            message = err
-                        })
-                    end
-                end
+                TriggerClientEvent('amb:showNotification', sessionId, 'Command Error', err, 'error', 5000, 'top-right')
             end
         else
             command.callback(player, args, function(msg, msgType)
                 if sessionId == 0 then
                     amb.print.info(("[COMMAND] %s"):format(msg))
                 else
-                    if player then
-                        local character = player.getCurrentCharacter()
-                        if character then
-                            character.triggerEvent("ambitions:showNotification", {
-                                type = msgType or "info",
-                                message = msg
-                            })
-                        end
-                    end
+                    TriggerClientEvent('amb:showNotification', sessionId, 'Command', msg, msgType or 'info', 5000, 'top-right')
                 end
             end)
         end
