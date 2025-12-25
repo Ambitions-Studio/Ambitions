@@ -37,7 +37,7 @@ amb.RegisterCommand("giveitem", "admin.giveItem", function(player, args, showMes
 
     local targetSessionId = args.target.sessionId
     local itemName = args.item
-    local count = args.count
+    local count = args.count or 1
     local metadata = args.metadata and json.decode(args.metadata) or nil
 
     local success, result = inventoryManager.addItem(targetSessionId, itemName, count, nil, metadata)
@@ -64,8 +64,8 @@ end, {
         arguments = {
             { name = "target", type = "player", help = "Player session ID or 'me'" },
             { name = "item", type = "item", help = "Item name (e.g., water, bread)" },
-            { name = "count", type = "number", help = "Quantity to give" },
-            { name = "metadata", type = "string", help = "Optional JSON metadata" }
+            { name = "count", type = "number", help = "Quantity (default: 1)", optional = true },
+            { name = "metadata", type = "string", help = "JSON metadata", optional = true }
         }
     }
 })

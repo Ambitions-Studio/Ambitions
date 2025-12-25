@@ -29,11 +29,15 @@ local function ValidateArguments(args, suggestion, sessionId)
         local argType = argDef.type or "any"
 
         if argType == "number" then
-            local numValue = tonumber(rawValue)
-            if not numValue then
-                err = ("Argument #%d (%s) must be a number"):format(index, argName)
+            if rawValue == nil and argDef.optional then
+                parsedArgs[argName] = nil
             else
-                parsedArgs[argName] = numValue
+                local numValue = tonumber(rawValue)
+                if not numValue then
+                    err = ("Argument #%d (%s) must be a number"):format(index, argName)
+                else
+                    parsedArgs[argName] = numValue
+                end
             end
 
         elseif argType == "player" then
@@ -55,7 +59,9 @@ local function ValidateArguments(args, suggestion, sessionId)
             end
 
         elseif argType == "string" then
-            if not rawValue or rawValue == "" then
+            if rawValue == nil and argDef.optional then
+                parsedArgs[argName] = nil
+            elseif not rawValue or rawValue == "" then
                 err = ("Argument #%d (%s) must be a valid string"):format(index, argName)
             else
                 parsedArgs[argName] = tostring(rawValue)
