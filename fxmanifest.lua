@@ -32,6 +32,7 @@ server_scripts {
     'config/migration.lua',
     'config/permissions.lua',
     'config/needs.lua',
+    'config/settings.lua',
 
     'server/database/schema.lua',
     'server/database/sqlGenerator.lua',
@@ -40,6 +41,7 @@ server_scripts {
     'server/database/permissionsSync.lua',
     'server/database/autoMigration.lua',
 
+    'server/classes/manager/*.lua',
     'server/classes/*.lua',
 
     'server/lib/**/*.lua',

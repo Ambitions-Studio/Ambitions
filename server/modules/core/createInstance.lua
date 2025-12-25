@@ -150,6 +150,7 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
         -- print('DEBUG is_dead from DB:', char.is_dead, 'type:', type(char.is_dead))re
 
         local characterData = {
+            inventoryId = char.inventory_id,
             firstname = char.firstname,
             lastname = char.lastname,
             dateofbirth = char.dateofbirth,

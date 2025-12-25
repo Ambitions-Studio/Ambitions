@@ -23,6 +23,7 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@field createdAt number | nil Character creation timestamp
   ---@field playtime number Character playtime in seconds
   ---@field needsManager AmbitionsNeedsManager Character needs manager instance
+  ---@field inventoryManager AmbitionsInventoryManager|nil Character inventory manager instance
   ---@field isDead boolean Whether the character is dead
   ---@field health number Character's health (0-100)
   ---@field armor number Character's armor (0-100)
@@ -44,10 +45,15 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   self.createdAt = data.createdAt or nil
   self.playtime = data.playtime or 0
   self.needsManager = CreateAmbitionsNeedsManager(uniqueId, data.needs)
+  self.inventoryManager = nil
   self.isDead = data.isDead or false
   local status = data.status or {}
   self.health = status.health or 100
   self.armor = status.armor or 0
+
+  if settingsConfig.useAmbitionsInventory then
+    self.inventoryManager = CreateAmbitionsInventoryManager(uniqueId, data.inventoryId)
+  end
 
   --- Trigger an event for the user
   ---@param eventName string The name of the event to trigger
@@ -439,6 +445,12 @@ function CreateAmbitionsCharacterObject(sessionId, uniqueId, data)
   ---@return AmbitionsNeedsManager needsManager The needs manager instance
   function self.getNeedsManager()
     return self.needsManager
+  end
+
+  --- Get the inventory manager instance
+  ---@return AmbitionsInventoryManager|nil inventoryManager The inventory manager instance or nil if inventory not enabled
+  function self.getInventoryManager()
+    return self.inventoryManager
   end
 
   --- Get character's dead status

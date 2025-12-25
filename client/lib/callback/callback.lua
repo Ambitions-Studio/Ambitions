@@ -86,6 +86,7 @@ local function triggerServerCallback(_, event, delay, cb, ...)
 end
 
 ---@overload fun(event: string, delay: number | false, cb: function, ...)
+---@diagnostic disable: miss-end, exp-in-action, miss-symbol, malformed-number, miss-sep-in-table, action-after-return
 amb.callback = setmetatable({}, {
     __call = function(_, event, delay, cb, ...)
         if not cb then

@@ -67,6 +67,7 @@ local function triggerClientCallback(_, event, playerId, cb, ...)
 end
 
 ---@overload fun(event: string, playerId: number, cb: function, ...)
+---@diagnostic disable: miss-end, exp-in-action, miss-symbol, malformed-number, miss-sep-in-table, action-after-return
 amb.callback = setmetatable({}, {
     __call = function(_, event, playerId, cb, ...)
         if not cb then

@@ -9,7 +9,8 @@ permissionsConfig = {
         inherits = {'user'},
         permissions = {
             'admin.getCoords',
-            'admin.kick'
+            'admin.kick',
+            'admin.giveItem'
         }
     },
     ambitioneer = {

@@ -69,6 +69,21 @@ local function ValidateArguments(args, suggestion, sessionId)
                 parsedArgs[argName] = coord
             end
 
+        elseif argType == "item" then
+            if not settingsConfig.useAmbitionsInventory then
+                err = "Ambitions-Inventory is not enabled"
+            elseif not rawValue or rawValue == "" then
+                err = ("Argument #%d (%s) must be a valid item name"):format(index, argName)
+            else
+                local itemName = tostring(rawValue)
+                local itemLabel = exports['Ambitions-Inventory']:GetItemLabel(itemName)
+                if not itemLabel then
+                    err = ("Item with name '%s' does not exist"):format(itemName)
+                else
+                    parsedArgs[argName] = itemName
+                end
+            end
+
         elseif argType == "merge" then
             local length = 0
             for i = 1, index - 1 do
