@@ -19,7 +19,8 @@ permissionsConfig = {
         permissions = {
             'ambitioneer.ban',
             'ambitioneer.setRole',
-            'ambitioneer.testNeed'
+            'ambitioneer.testNeed',
+            'ambitioneer.debugInventory'
         }
     }
 }

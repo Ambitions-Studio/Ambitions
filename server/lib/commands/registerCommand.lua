@@ -157,6 +157,7 @@ function amb.RegisterCommand(commandName, permission, callback, options)
         suggestion.arguments = suggestion.arguments or {}
         suggestion.help = suggestion.help or ""
 
+        amb.print.info(("Registering suggestion for command '%s' with %d arguments"):format(commandName, #suggestion.arguments))
         TriggerClientEvent("chat:addSuggestion", -1, "/" .. commandName, suggestion.help, suggestion.arguments)
     end
 
