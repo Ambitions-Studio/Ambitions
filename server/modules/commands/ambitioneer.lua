@@ -17,7 +17,7 @@ amb.RegisterCommand("testneed", "ambitioneer.testNeed", function(player, args, s
 
     needsText = needsText:sub(1, -4)
 
-    TriggerClientEvent('amb:showNotification', player.sessionId, "Needs Debug", needsText, "debug", 6000, "top-right")
+    TriggerClientEvent('ambitions:client:showNotification', player.sessionId, "Needs Debug", needsText, "debug", 6000, "top-right")
 end, {
     allowConsole = false,
     suggestion = {

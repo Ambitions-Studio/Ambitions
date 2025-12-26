@@ -27,7 +27,7 @@ local function StartHealthDecay()
                         if hunger <= 0 and thirst <= 0 then
                             damageAmount = damageAmount * 2
                         end
-                        TriggerClientEvent('ambitions:client:damagePlayer', sessionId, damageAmount)
+                        TriggerClientEvent('ambitions-hud:client:damagePlayer', sessionId, damageAmount)
                     end
                 end
             end
@@ -65,7 +65,7 @@ local function StartHungerDegradation()
                 if userObject.currentCharacter and userObject.currentCharacter.isCharacterActive() then
                     userObject.currentCharacter.getNeedsManager().decay('hunger', needsConfig.degradation.hunger.amount)
                     local newValue = userObject.currentCharacter.getNeed('hunger')
-                    TriggerClientEvent('ambitions:client:updateNeed', sessionId, 'hunger', newValue)
+                    TriggerClientEvent('ambitions-hud:client:updateNeed', sessionId, 'hunger', newValue)
                 end
             end
         end
@@ -96,7 +96,7 @@ local function StartThirstDegradation()
                 if userObject.currentCharacter and userObject.currentCharacter.isCharacterActive() then
                     userObject.currentCharacter.getNeedsManager().decay('thirst', needsConfig.degradation.thirst.amount)
                     local newValue = userObject.currentCharacter.getNeed('thirst')
-                    TriggerClientEvent('ambitions:client:updateNeed', sessionId, 'thirst', newValue)
+                    TriggerClientEvent('ambitions-hud:client:updateNeed', sessionId, 'thirst', newValue)
                 end
             end
         end

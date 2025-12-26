@@ -16,5 +16,5 @@ RegisterNetEvent('ambitions:server:updateNeeds', function(sessionId, needsType, 
 
     needsManager.update(needsType, amount)
     local newValue = needsManager.get(needsType)
-    TriggerClientEvent('ambitions:client:updateNeed', sessionId, needsType, newValue)
+    TriggerClientEvent('ambitions-hud:client:updateNeed', sessionId, needsType, newValue)
 end)
