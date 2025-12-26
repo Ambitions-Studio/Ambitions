@@ -1,8 +1,11 @@
 CreateThread(function()
+    amb.print.info('Waiting for Ambitions-Inventory to start...')
+
     while GetResourceState('Ambitions-Inventory') ~= 'started' do
         Wait(100)
     end
 
+    amb.print.info('Ambitions-Inventory started, registering usable items...')
 
     --[[ ═══════════════════════════════════════════════════════════════════════
                                         FOOD
@@ -153,4 +156,6 @@ CreateThread(function()
         needsManager.update('thirst', 25)
         TriggerClientEvent('ambitions-hud:client:updateNeed', sessionId, 'thirst', needsManager.get('thirst'))
     end)
+
+    amb.print.info('All usable items registered successfully!')
 end)
