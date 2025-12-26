@@ -28,17 +28,10 @@ end, {
 })
 
 amb.RegisterCommand("debuginventory", "ambitioneer.debugInventory", function(player, args, showMessage)
-    amb.print.debug('[debuginventory] amb.cache address: ' .. tostring(amb.cache))
-    amb.print.debug('[debuginventory] args.target address: ' .. tostring(args.target))
-    amb.print.debug('[debuginventory] args.target.sessionId: ' .. tostring(args.target.sessionId))
-
     local targetCharacter = args.target.getCurrentCharacter()
     if not targetCharacter then
         return showMessage("Target player has no active character", "error")
     end
-
-    amb.print.debug('[debuginventory] targetCharacter address: ' .. tostring(targetCharacter))
-    amb.print.debug('[debuginventory] targetCharacter uniqueId: ' .. tostring(targetCharacter.getUniqueId()))
 
     local inventoryManager = targetCharacter.getInventoryManager()
     if not inventoryManager then

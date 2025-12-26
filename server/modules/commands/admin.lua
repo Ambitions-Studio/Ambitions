@@ -30,32 +30,12 @@ amb.RegisterCommand("giveitem", "admin.giveItem", function(player, args, showMes
         return showMessage("Target player has no active character", "error")
     end
 
-    local inventoryManager = targetCharacter.getInventoryManager()
-    if not inventoryManager then
-        return showMessage("Target player has no inventory", "error")
-    end
-
     local targetSessionId = args.target.sessionId
     local itemName = args.item
     local count = args.count or 1
     local metadata = args.metadata and json.decode(args.metadata) or nil
 
-    local success, result = inventoryManager.addItem(targetSessionId, itemName, count, nil, metadata)
-
-    if success then
-        local itemLabel = exports['Ambitions-Inventory']:GetItemLabel(itemName)
-        local targetName = targetCharacter.getFullName()
-        showMessage(("Gave %dx %s to %s"):format(count, itemLabel, targetName), "success")
-
-        amb.print.info(("Admin gave %dx %s to %s (ID: %d)"):format(
-            count,
-            itemLabel,
-            targetName,
-            targetSessionId
-        ))
-    else
-        showMessage(("Failed to give item: %s"):format(result), "error")
-    end
+    return exports['Ambitions-Inventory']:AddItem(targetSessionId, itemName, count, nil, metadata)
 end, {
     allowConsole = true,
     suggestion = {
