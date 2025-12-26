@@ -1,4 +1,3 @@
---- Get player coordinates command
 amb.RegisterCommand("getcoords", "admin.getCoords", function(player, args, showMessage)
     if not player then
         return showMessage("This command cannot be used from console")

@@ -46,6 +46,9 @@ function SetValidCallback(callbackName, isValid)
     registeredCallbacks[callbackName] = resourceName
 end
 
+--- Checks if a callback is registered by the invoking resource
+---@param callbackName string The name of the callback to check
+---@return boolean isValid Whether the callback is valid for this resource
 function IsCallbackValid(callbackName)
     return registeredCallbacks[callbackName] == GetInvokingResource() or GetCurrentResourceName()
 end

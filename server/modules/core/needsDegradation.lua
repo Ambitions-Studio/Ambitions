@@ -2,6 +2,7 @@ local hungerThread = nil
 local thirstThread = nil
 local healthDecayThread = nil
 
+--- Starts the health decay thread that damages players with empty hunger or thirst
 local function StartHealthDecay()
     if healthDecayThread then
         return
@@ -36,11 +37,13 @@ local function StartHealthDecay()
     amb.print.success('Health decay thread started')
 end
 
+--- Stops the health decay thread
 local function StopHealthDecay()
     healthDecayThread = nil
     amb.print.info('Health decay thread stopped')
 end
 
+--- Starts the hunger degradation thread that decreases hunger over time
 local function StartHungerDegradation()
     if not needsConfig.degradation.hunger.enabled then
         return
@@ -71,6 +74,7 @@ local function StartHungerDegradation()
     amb.print.success('Hunger degradation thread started')
 end
 
+--- Starts the thirst degradation thread that decreases thirst over time
 local function StartThirstDegradation()
     if not needsConfig.degradation.thirst.enabled then
         return
@@ -101,16 +105,19 @@ local function StartThirstDegradation()
     amb.print.success('Thirst degradation thread started')
 end
 
+--- Stops the hunger degradation thread
 local function StopHungerDegradation()
     hungerThread = nil
     amb.print.info('Hunger degradation thread stopped')
 end
 
+--- Stops the thirst degradation thread
 local function StopThirstDegradation()
     thirstThread = nil
     amb.print.info('Thirst degradation thread stopped')
 end
 
+--- Initializes all needs degradation threads
 local function InitializeNeedsDegradation()
     StartHungerDegradation()
     StartThirstDegradation()

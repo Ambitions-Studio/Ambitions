@@ -1,4 +1,3 @@
---- Test needs command
 amb.RegisterCommand("testneed", "ambitioneer.testNeed", function(player, args, showMessage)
     if not player then
         return showMessage("This command can only be used by players", "error")
@@ -79,7 +78,6 @@ end, {
     }
 })
 
---- Set player role command
 amb.RegisterCommand("setrole", "ambitioneer.setRole", function(player, args, showMessage)
     if not amb.permissions.RoleExists(args.role) then
         return showMessage(("Role '%s' does not exist"):format(args.role), "error")
