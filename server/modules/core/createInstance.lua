@@ -1,3 +1,94 @@
+local function LoadCharacterInventory(characterObject, inventoryId)
+    if not settingsConfig.useAmbitionsInventory or not inventoryId then
+        return
+    end
+
+    local inventoryManager = characterObject.getInventoryManager()
+    if not inventoryManager then
+        return
+    end
+
+    local inventoryData = MySQL.single.await('SELECT max_slots, max_weight FROM inventories WHERE id = ?', { inventoryId })
+    if inventoryData then
+        inventoryManager.setMaxSlots(inventoryData.max_slots)
+        inventoryManager.setMaxWeight(inventoryData.max_weight)
+    end
+
+    local dbItems = MySQL.query.await('SELECT slot, item, count, meta FROM inventory_items WHERE inventory_id = ?', { inventoryId })
+    if not dbItems then
+        return
+    end
+
+    local items = inventoryManager.getItems()
+    for _, row in ipairs(dbItems) do
+        local metadata = row.meta and json.decode(row.meta) or {}
+        items[tonumber(row.slot)] = {
+            name = row.item,
+            count = row.count,
+            metadata = metadata
+        }
+    end
+
+    amb.print.debug('Loaded ' .. #dbItems .. ' items for character ' .. characterObject.getUniqueId())
+end
+
+local function ParseJsonField(jsonString)
+    if not jsonString then
+        return nil
+    end
+
+    local success, decoded = pcall(json.decode, jsonString)
+    return success and decoded or nil
+end
+
+local function BuildCharacterData(char)
+    return {
+        inventoryId = char.inventory_id,
+        firstname = char.firstname,
+        lastname = char.lastname,
+        dateofbirth = char.dateofbirth,
+        sex = char.sex,
+        nationality = char.nationality,
+        height = char.height,
+        appearance = char.appearance,
+        pedModel = char.ped_model,
+        position = {
+            x = char.position_x,
+            y = char.position_y,
+            z = char.position_z,
+            heading = char.heading
+        },
+        group = char.group or 'user',
+        playtime = char.playtime or 0,
+        createdAt = char.created_at,
+        lastPlayed = char.last_played,
+        needs = ParseJsonField(char.needs),
+        isDead = char.is_dead == 1 or char.is_dead == true,
+        status = ParseJsonField(char.status)
+    }
+end
+
+local function CreateAndCacheCharacter(sessionId, userObject, char)
+    local characterData = BuildCharacterData(char)
+    local characterObject = CreateAmbitionsCharacterObject(sessionId, char.unique_id, characterData)
+
+    if not characterObject then
+        amb.print.error('Failed to create character object for uniqueId ' .. char.unique_id)
+        return false
+    end
+
+    local addSuccess = userObject.addCharacter(characterObject)
+    if not addSuccess then
+        amb.print.error('Failed to add character ' .. char.unique_id .. ' to user cache for session ' .. sessionId)
+        return false
+    end
+
+    amb.print.success('Character ' .. char.unique_id .. ' added to cache for session ' .. sessionId)
+    LoadCharacterInventory(characterObject, char.inventory_id)
+
+    return true
+end
+
 RegisterNetEvent('ambitions:server:insertUserIntoCache', function(sessionId, playerLicense)
 
     if not sessionId or not playerLicense then
@@ -129,64 +220,7 @@ RegisterNetEvent('ambitions:server:insertRetrievedIntoCache', function(sessionId
     end
 
     for i = 1, #characters do
-        local char = characters[i]
-
-        local needsData = nil
-        if char.needs then
-            local success, decoded = pcall(json.decode, char.needs)
-            if success then
-                needsData = decoded
-            end
-        end
-
-        local statusData = nil
-        if char.status then
-            local statusSuccess, statusDecoded = pcall(json.decode, char.status)
-            if statusSuccess then
-                statusData = statusDecoded
-            end
-        end
-
-        -- print('DEBUG is_dead from DB:', char.is_dead, 'type:', type(char.is_dead))re
-
-        local characterData = {
-            inventoryId = char.inventory_id,
-            firstname = char.firstname,
-            lastname = char.lastname,
-            dateofbirth = char.dateofbirth,
-            sex = char.sex,
-            nationality = char.nationality,
-            height = char.height,
-            appearance = char.appearance,
-            pedModel = char.ped_model,
-            position = {
-                x = char.position_x,
-                y = char.position_y,
-                z = char.position_z,
-                heading = char.heading
-            },
-            group = char.group or 'user',
-            playtime = char.playtime or 0,
-            createdAt = char.created_at,
-            lastPlayed = char.last_played,
-            needs = needsData,
-            isDead = char.is_dead == 1 or char.is_dead == true,
-            status = statusData
-        }
-
-        local characterObject = CreateAmbitionsCharacterObject(sessionId, char.unique_id, characterData)
-
-        if not characterObject then
-            amb.print.error('Failed to create character object for uniqueId ' .. char.unique_id)
-        else
-            local addSuccess = userObject.addCharacter(characterObject)
-
-            if not addSuccess then
-                amb.print.error('Failed to add character ' .. char.unique_id .. ' to user cache for session ' .. sessionId)
-            else
-                amb.print.success('Character ' .. char.unique_id .. ' added to cache for session ' .. sessionId)
-            end
-        end
+        CreateAndCacheCharacter(sessionId, userObject, characters[i])
     end
 
     -- Debug prints
