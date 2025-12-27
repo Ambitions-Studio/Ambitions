@@ -10,7 +10,7 @@ CreateThread(function()
     --[[ ═══════════════════════════════════════════════════════════════════════
                                         FOOD
     ═══════════════════════════════════════════════════════════════════════ ]]
-    local success, error = exports['Ambitions-Inventory']:CreateUsableItem('bread', function(sessionId, item)
+    local breadCallback = function(sessionId, item)
         local player = amb.cache.getPlayer(sessionId)
         if not player then
             return amb.print.error('Failed to use bread: Player not found for session ' .. tostring(sessionId))
@@ -32,8 +32,10 @@ CreateThread(function()
         local needsManager = character.getNeedsManager()
         needsManager.update('hunger', 20)
         TriggerClientEvent('ambitions-hud:client:updateNeed', sessionId, 'hunger', needsManager.get('hunger'))
-    end)
+    end
 
+    amb.print.debug(('breadCallback type: %s, value: %s'):format(type(breadCallback), tostring(breadCallback)))
+    local success, error = exports['Ambitions-Inventory']:CreateUsableItem('bread', breadCallback)
     amb.print.debug(('Register bread as a usable item %s (%s)'):format(success, error or 'ok'))
 
     exports['Ambitions-Inventory']:CreateUsableItem('burger', function(sessionId, item)
